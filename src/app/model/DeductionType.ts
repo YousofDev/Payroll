@@ -5,7 +5,6 @@ import {
   serial,
   timestamp,
   varchar,
-  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const DeductionType = pgTable("deduction_types", {

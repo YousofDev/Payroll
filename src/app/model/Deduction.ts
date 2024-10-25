@@ -2,7 +2,6 @@ import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   decimal,
   integer,
-  pgEnum,
   pgTable,
   serial,
   timestamp,

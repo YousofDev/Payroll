@@ -2,7 +2,6 @@ import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   decimal,
   integer,
-  pgEnum,
   pgTable,
   serial,
   timestamp,
@@ -11,22 +10,18 @@ import {
   date,
 } from "drizzle-orm/pg-core";
 import { Employee } from "./Employee";
-import { Direction } from "@data/pgEnums";
-
-
-
-
+import { Direction, PayslipStatus } from "@data/pgEnums";
 
 export const Payslip = pgTable(
-  "pay_slips",
+  "payslips",
   {
-    id: serial("id").primaryKey(),
-    // payslipStatus: PayslipStatus(),
+    id: serial("id").primaryKey(),    
     employeeId: integer("employee_id").references(() => Employee.id, {
       onDelete: "cascade",
     }),
     startDate: date("start_date").notNull(),
     endDate: date("end_date").notNull(),
+    payslipStatus: PayslipStatus().notNull(),
     basicSalary: decimal("basic_salary").notNull(),
     totalAdditions: decimal("total_additions").notNull(),
     totalDeductions: decimal("total_deductions").notNull(),
@@ -55,7 +50,7 @@ export const PayslipItem = pgTable("payslip_items", {
   }),
   name: varchar("name", { length: 100 }).notNull(),
   description: varchar("description"),
-  direction: Direction(),
+  direction: Direction().notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 });
 
