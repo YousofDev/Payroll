@@ -1,15 +1,10 @@
 import { InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
 import {
-  boolean,
   date,
   decimal,
-  integer,
   pgTable,
-  primaryKey,
   serial,
-  text,
   timestamp,
-  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -30,5 +25,4 @@ export const Employee = pgTable("employees", {
 });
 
 export type NewEmployeeModel = InferInsertModel<typeof Employee>;
-
 export type EmployeeModel = InferSelectModel<typeof Employee>;

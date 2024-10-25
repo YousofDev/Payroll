@@ -1,3 +1,6 @@
+
+src/common/data/migrations/
+
 # Logs
 logs/
 *.log
