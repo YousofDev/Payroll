@@ -10,16 +10,16 @@ import { Employee } from "./Employee";
 import { DeductionType } from "./DeductionType";
 import { FrequencyType } from "@data/pgEnums";
 
-
 export const Deduction = pgTable("deductions", {
   id: serial("id").primaryKey(),
-  deductionTypeId: integer("deduction_type_id").references(
-    () => DeductionType.id,
-    { onDelete: "cascade" }
-  ),
-  employeeId: integer("employee_id").references(() => Employee.id, {
-    onDelete: "cascade",
-  }),
+  deductionTypeId: integer("deduction_type_id")
+    .references(() => DeductionType.id, { onDelete: "cascade" })
+    .notNull(),
+  employeeId: integer("employee_id")
+    .references(() => Employee.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   frequencyType: FrequencyType().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

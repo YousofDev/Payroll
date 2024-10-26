@@ -4,6 +4,7 @@ import {
   NewAdditionTypeModel,
 } from "@app/model/AdditionType";
 import { DatabaseClient } from "@data/DatabaseClient";
+import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 import { eq } from "drizzle-orm";
 
@@ -58,5 +59,16 @@ export class AdditionTypeRepository {
     await this.db
       .delete(AdditionType)
       .where(eq(AdditionType.id, additionTypeId));
+  }
+
+  public async getAdditionTypeOrThrowException(additionTypeId: number) {
+    const additionType = await this.getAdditionTypeById(additionTypeId);
+
+    if (!additionType) {
+      throw new NotFoundException(
+        `Addition type ID with ${additionTypeId} does not exists`
+      );
+    }
+    return additionType;
   }
 }

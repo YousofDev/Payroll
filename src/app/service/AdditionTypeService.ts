@@ -5,9 +5,7 @@ import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 
 export class AdditionTypeService {
-  public constructor(
-    private readonly additionTypeRepository: AdditionTypeRepository
-  ) {
+  public constructor(private readonly additionTypeRepository: AdditionTypeRepository) {
     logger.info("AdditionTypeService initialized");
   }
 
@@ -24,7 +22,10 @@ export class AdditionTypeService {
   }
 
   public async getAdditionTypeById(additionTypeId: number) {
-    const additionType = await this.findAdditionTypeById(additionTypeId);
+    const additionType =
+      await this.additionTypeRepository.getAdditionTypeOrThrowException(
+        additionTypeId
+      );
     return new AdditionTypeResponseDto(additionType);
   }
 
@@ -32,7 +33,9 @@ export class AdditionTypeService {
     additionTypeDto: NewAdditionTypeModel,
     additionTypeId: number
   ) {
-    await this.findAdditionTypeById(additionTypeId);
+    await this.additionTypeRepository.getAdditionTypeOrThrowException(
+      additionTypeId
+    );
     const additionType = await this.additionTypeRepository.updateAdditionType(
       additionTypeDto,
       additionTypeId
@@ -41,19 +44,9 @@ export class AdditionTypeService {
   }
 
   public async deleteAdditionTypeById(additionTypeId: number): Promise<void> {
-    await this.findAdditionTypeById(additionTypeId);
-    this.additionTypeRepository.deleteAdditionTypeById(additionTypeId);
-  }
-
-  private async findAdditionTypeById(additionTypeId: number) {
-    const additionType =
-      await this.additionTypeRepository.getAdditionTypeById(additionTypeId);
-
-    if (!additionType) {
-      throw new NotFoundException(
-        `Addition type ID with ${additionTypeId} does not exists`
-      );
-    }
-    return additionType;
+    await this.additionTypeRepository.getAdditionTypeOrThrowException(
+      additionTypeId
+    );
+    await this.additionTypeRepository.deleteAdditionTypeById(additionTypeId);
   }
 }

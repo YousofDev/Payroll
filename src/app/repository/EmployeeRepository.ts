@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { logger } from "@util/logger";
 import { DatabaseClient } from "@data/DatabaseClient";
 import { NewEmployeeModel, EmployeeModel, Employee } from "@app/model/Employee";
+import { NotFoundException } from "@exception/NotFoundException";
 
 export class EmployeeRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
@@ -52,5 +53,13 @@ export class EmployeeRepository {
 
   public async deleteEmployeeById(employeeId: number): Promise<void> {
     await this.db.delete(Employee).where(eq(Employee.id, employeeId));
+  }
+
+  public async getEmployeeOrThrowException(employeeId: number) {
+    const employee = await this.getEmployeeById(employeeId);
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${employeeId} not found`);
+    }
+    return employee;
   }
 }

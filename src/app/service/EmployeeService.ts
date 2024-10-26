@@ -20,7 +20,8 @@ export class EmployeeService {
   }
 
   public async getEmployeeById(employeeId: number) {
-    const employee = await this.findEmployeeById(employeeId);
+    const employee =
+      await this.employeeRepository.getEmployeeOrThrowException(employeeId);
     return new EmployeeResponseDto(employee);
   }
 
@@ -28,7 +29,8 @@ export class EmployeeService {
     employeeDto: NewEmployeeModel,
     employeeId: number
   ) {
-    let employee = await this.findEmployeeById(employeeId);
+    let employee =
+      await this.employeeRepository.getEmployeeOrThrowException(employeeId);
     employee = await this.employeeRepository.updateEmployee(
       employeeDto,
       employeeId
@@ -37,15 +39,7 @@ export class EmployeeService {
   }
 
   public async deleteEmployeeById(employeeId: number) {
-    await this.findEmployeeById(employeeId);
+    await this.employeeRepository.getEmployeeOrThrowException(employeeId);
     await this.employeeRepository.deleteEmployeeById(employeeId);
-  }
-
-  private async findEmployeeById(employeeId: number) {
-    const employee = await this.employeeRepository.getEmployeeById(employeeId);
-    if (!employee) {
-      throw new NotFoundException(`Employee with ID ${employeeId} not found`);
-    }
-    return employee;
   }
 }

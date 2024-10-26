@@ -12,13 +12,14 @@ import { FrequencyType } from "@data/pgEnums";
 
 export const Addition = pgTable("additions", {
   id: serial("id").primaryKey(),
-  additionTypeId: integer("addition_type_id").references(
-    () => AdditionType.id,
-    { onDelete: "cascade" }
-  ),
-  employeeId: integer("employee_id").references(() => Employee.id, {
-    onDelete: "cascade",
-  }),
+  additionTypeId: integer("addition_type_id")
+    .references(() => AdditionType.id, { onDelete: "cascade" })
+    .notNull(),
+  employeeId: integer("employee_id")
+    .references(() => Employee.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   frequencyType: FrequencyType().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

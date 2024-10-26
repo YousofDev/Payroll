@@ -7,6 +7,7 @@ import errorHandler from "@middleware/errorHandler";
 import { createEmployeeRoutes } from "@app/route/employeeRoutes";
 import { createAdditionTypeRoutes } from "@app/route/additionTypeRoutes";
 import { createDeductionTypeRoutes } from "@app/route/deductionTypeRoutes";
+import { createAdditionRoutes } from "@app/route/additionRoutes";
 
 const employeeRoutes = createEmployeeRoutes(controllers.employeeController);
 const deductionTypeRoutes = createDeductionTypeRoutes(
@@ -15,10 +16,12 @@ const deductionTypeRoutes = createDeductionTypeRoutes(
 const additionTypeRoutes = createAdditionTypeRoutes(
   controllers.additionTypeController
 );
+const additionRoutes = createAdditionRoutes(controllers.additionController);
 
 app.use(employeeRoutes);
 app.use(additionTypeRoutes);
 app.use(deductionTypeRoutes);
+app.use(additionRoutes);
 
 app.all("*", handleUndefinedRoutes);
 app.use(errorHandler);
