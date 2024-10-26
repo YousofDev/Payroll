@@ -4,6 +4,7 @@ import {
   NewDeductionTypeModel,
 } from "@app/model/DeductionType";
 import { DatabaseClient } from "@data/DatabaseClient";
+import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 import { eq } from "drizzle-orm";
 
@@ -58,5 +59,16 @@ export class DeductionTypeRepository {
     await this.db
       .delete(DeductionType)
       .where(eq(DeductionType.id, deductionTypeId));
+  }
+
+  public async getDeductionTypeOrThrowException(deductionTypeId: number) {
+    const deductionType = await this.getDeductionTypeById(deductionTypeId);
+
+    if (!deductionType) {
+      throw new NotFoundException(
+        `Deduction type ID with ${deductionTypeId} does not exists`
+      );
+    }
+    return deductionType;
   }
 }

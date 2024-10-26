@@ -24,7 +24,10 @@ export class DeductionTypeService {
   }
 
   public async getDeductionTypeById(deductionTypeId: number) {
-    const deductionType = await this.findDeductionTypeById(deductionTypeId);
+    const deductionType =
+      await this.deductionTypeRepository.getDeductionTypeOrThrowException(
+        deductionTypeId
+      );
     return new DeductionTypeResponseDto(deductionType);
   }
 
@@ -32,7 +35,9 @@ export class DeductionTypeService {
     deductionTypeDto: NewDeductionTypeModel,
     deductionTypeId: number
   ) {
-    await this.findDeductionTypeById(deductionTypeId);
+    await this.deductionTypeRepository.getDeductionTypeOrThrowException(
+      deductionTypeId
+    );
     const deductionType =
       await this.deductionTypeRepository.updateDeductionType(
         deductionTypeDto,
@@ -42,19 +47,9 @@ export class DeductionTypeService {
   }
 
   public async deleteDeductionTypeById(deductionTypeId: number): Promise<void> {
-    await this.findDeductionTypeById(deductionTypeId);
+    await this.deductionTypeRepository.getDeductionTypeOrThrowException(
+      deductionTypeId
+    );
     this.deductionTypeRepository.deleteDeductionTypeById(deductionTypeId);
-  }
-
-  private async findDeductionTypeById(deductionTypeId: number) {
-    const deductionType =
-      await this.deductionTypeRepository.getDeductionTypeById(deductionTypeId);
-
-    if (!deductionType) {
-      throw new NotFoundException(
-        `Deduction type ID with ${deductionTypeId} does not exists`
-      );
-    }
-    return deductionType;
   }
 }
