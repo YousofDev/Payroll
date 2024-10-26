@@ -5,10 +5,15 @@ import { logger } from "@util/logger";
 import { handleUndefinedRoutes } from "@middleware/handleUndefinedRoutes";
 import errorHandler from "@middleware/errorHandler";
 import { createEmployeeRoutes } from "@app/route/employeeRoutes";
+import { createAdditionTypeRoutes } from "@app/route/additionTypeRoutes";
 
 const employeeRoutes = createEmployeeRoutes(controllers.employeeController);
+const additionTypeRoutes = createAdditionTypeRoutes(
+  controllers.additionTypeController
+);
 
 app.use(employeeRoutes);
+app.use(additionTypeRoutes);
 
 app.all("*", handleUndefinedRoutes);
 app.use(errorHandler);

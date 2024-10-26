@@ -1,0 +1,16 @@
+import { z } from "zod";
+import { frequencyType } from "@util/constants";
+
+export const AdditionTypeUpdateRequestDto = z.object({
+  body: z.object({
+    name: z.string().min(3).max(50),
+    description: z.string().optional(),
+    frequencyType: z.enum(frequencyType),
+  }),
+
+  params: z.object({
+    additionTypeId: z
+      .string()
+      .transform((additionTypeId) => parseInt(additionTypeId)),
+  }),
+});

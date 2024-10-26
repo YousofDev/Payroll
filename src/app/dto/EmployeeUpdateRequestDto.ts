@@ -44,9 +44,7 @@ export const EmployeeUpdateRequestDto = z.object({
 
   params: z.object({
     employeeId: z
-      .string({
-        required_error: "Employee id is required",
-      })
+      .string()
       .transform((employeeId) => parseInt(employeeId)),
   }),
 });

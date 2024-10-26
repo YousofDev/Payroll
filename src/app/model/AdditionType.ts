@@ -12,8 +12,8 @@ export const AdditionType = pgTable("addition_types", {
   name: varchar("name", { length: 100 }).notNull(),
   description: varchar("description"),
   frequencyType: FrequencyType().notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export type NewAdditionTypeModel = InferInsertModel<typeof AdditionType>;

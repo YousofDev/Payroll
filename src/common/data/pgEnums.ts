@@ -12,10 +12,10 @@ export const PayslipStatus = pgEnum("payslip_status ", [
 
 /*
 
+--> SQL Statement must apply manually
+
 CREATE TYPE frequency_type AS ENUM ('MONTHLY', 'SPECIAL');
-
 CREATE TYPE payslip_status AS ENUM ('DRAFT', 'PROCESSED', 'PAID');
-
 CREATE TYPE direction AS ENUM ('ADDITION', 'DEDUCTION');
 
 */

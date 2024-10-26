@@ -25,6 +25,7 @@ export const env = zennv({
     EMAIL_PORT: z.string(),
     EMAIL_USERNAME: z.string(),
     EMAIL_PASSWORD: z.string(),
-    DEBUG: z.string()
+    DEBUG: z.string(),
+    API_VERSION: z.string()
   }),
 });
