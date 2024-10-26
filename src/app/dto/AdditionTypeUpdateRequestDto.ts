@@ -9,8 +9,8 @@ export const AdditionTypeUpdateRequestDto = z.object({
   }),
 
   params: z.object({
-    additionTypeId: z
-      .string()
-      .transform((additionTypeId) => parseInt(additionTypeId)),
+    id: z
+      .string({message: "Addition type ID Required"})
+      .transform((id) => parseInt(id)),
   }),
 });

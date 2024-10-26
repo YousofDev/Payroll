@@ -1,30 +1,22 @@
 import { Router } from "express";
+import { container } from "@config/dependencyContainer";
 import { AdditionController } from "@app/controller/AdditionController";
 import { env } from "@config/env";
 
-export const createAdditionRoutes = (controller: AdditionController) => {
-  const router = Router();
+const path = `${env.API_VERSION}/additions`;
 
-  const basePath = `${env.API_VERSION}/additions`;
+const controller = container.resolve<AdditionController>("AdditionController");
 
-  router.get(`${basePath}`, controller.getAllAdditions.bind(controller));
+const router = Router();
 
-  router.post(`${basePath}`, controller.createAddition.bind(controller));
+router.get(`${path}`, controller.getAllAdditions);
 
-  router.get(
-    `${basePath}/:additionId`,
-    controller.getAdditionById.bind(controller)
-  );
+router.post(`${path}`, controller.createAddition);
 
-  router.put(
-    `${basePath}/:additionId`,
-    controller.updateAddition.bind(controller)
-  );
+router.get(`${path}/:id`, controller.getAdditionById);
 
-  router.delete(
-    `${basePath}/:additionId`,
-    controller.deleteAdditionById.bind(controller)
-  );
+router.put(`${path}/:id`, controller.updateAddition);
 
-  return router;
-};
+router.delete(`${path}/:id`, controller.deleteAdditionById);
+
+export const additionRoutes = router;

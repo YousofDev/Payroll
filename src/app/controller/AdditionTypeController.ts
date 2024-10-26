@@ -40,7 +40,7 @@ export class AdditionTypeController {
       const { params } = await validate(AdditionTypeIdRequestDto, req);
 
       const additionType = await this.additionTypeService.getAdditionTypeById(
-        params.additionTypeId
+        params.id
       );
 
       ResponseEntity.ok(res, additionType);
@@ -56,7 +56,7 @@ export class AdditionTypeController {
 
       const additionType = await this.additionTypeService.updateAdditionType(
         body,
-        params.additionTypeId
+        params.id
       );
 
       ResponseEntity.ok(res, additionType);
@@ -67,9 +67,7 @@ export class AdditionTypeController {
     async (req: Request, res: Response) => {
       const { params } = await validate(AdditionTypeIdRequestDto, req);
 
-      await this.additionTypeService.deleteAdditionTypeById(
-        params.additionTypeId
-      );
+      await this.additionTypeService.deleteAdditionTypeById(params.id);
 
       ResponseEntity.noContent(res);
     }

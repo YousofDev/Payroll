@@ -1,22 +1,13 @@
-import { controllers } from "@util/dependencyContainer";
-import { app } from "@config/app";
+import "@config/dependencyContainer";
 import { env } from "@config/env";
+import { app } from "@config/app";
 import { logger } from "@util/logger";
 import { handleUndefinedRoutes } from "@middleware/handleUndefinedRoutes";
 import errorHandler from "@middleware/errorHandler";
-import { createEmployeeRoutes } from "@app/route/employeeRoutes";
-import { createAdditionTypeRoutes } from "@app/route/additionTypeRoutes";
-import { createDeductionTypeRoutes } from "@app/route/deductionTypeRoutes";
-import { createAdditionRoutes } from "@app/route/additionRoutes";
-
-const employeeRoutes = createEmployeeRoutes(controllers.employeeController);
-const deductionTypeRoutes = createDeductionTypeRoutes(
-  controllers.deductionTypeController
-);
-const additionTypeRoutes = createAdditionTypeRoutes(
-  controllers.additionTypeController
-);
-const additionRoutes = createAdditionRoutes(controllers.additionController);
+import { employeeRoutes } from "@app/route/employeeRoutes";
+import { additionRoutes } from "@app/route/additionRoutes";
+import { deductionTypeRoutes } from "@app/route/deductionTypeRoutes";
+import { additionTypeRoutes } from "@app/route/additionTypeRoutes";
 
 app.use(employeeRoutes);
 app.use(additionTypeRoutes);

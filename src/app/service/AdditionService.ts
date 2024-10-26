@@ -57,7 +57,7 @@ export class AdditionService {
     return new AdditionResponseDto(addition);
   }
 
-  public async deleteAdditionById(additionId: number): Promise<void> {
+  public async deleteAdditionById(additionId: number) {
     await this.additionRepository.getAdditionOrThrowException(additionId);
     this.additionRepository.deleteAdditionById(additionId);
   }

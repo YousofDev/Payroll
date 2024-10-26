@@ -1,32 +1,24 @@
 import { Router } from "express";
+import { container } from "@config/dependencyContainer";
 import { DeductionTypeController } from "@app/controller/DeductionTypeController";
 import { env } from "@config/env";
 
-export const createDeductionTypeRoutes = (
-  controller: DeductionTypeController
-) => {
-  const router = Router();
+const path = `${env.API_VERSION}/deduction-types`;
 
-  const basePath = `${env.API_VERSION}/deduction-types`;
+const controller = container.resolve<DeductionTypeController>(
+  "DeductionTypeController"
+);
 
-  router.get(`${basePath}`, controller.getAllDeductionTypes.bind(controller));
+const router = Router();
 
-  router.post(`${basePath}`, controller.createDeductionType.bind(controller));
+router.get(`${path}`, controller.getAllDeductionTypes);
 
-  router.get(
-    `${basePath}/:deductionTypeId`,
-    controller.getDeductionTypeById.bind(controller)
-  );
+router.post(`${path}`, controller.createDeductionType);
 
-  router.put(
-    `${basePath}/:deductionTypeId`,
-    controller.updateDeductionType.bind(controller)
-  );
+router.get(`${path}/:id`, controller.getDeductionTypeById);
 
-  router.delete(
-    `${basePath}/:deductionTypeId`,
-    controller.deleteDeductionTypeById.bind(controller)
-  );
+router.put(`${path}/:id`, controller.updateDeductionType);
 
-  return router;
-};
+router.delete(`${path}/:id`, controller.deleteDeductionTypeById);
+
+export const deductionTypeRoutes = router;

@@ -26,9 +26,7 @@ export class EmployeeController {
 
   public getEmployeeById = catchAsync(async (req: Request, res: Response) => {
     const { params } = await validate(EmployeeIdRequestDto, req);
-    const employee = await this.employeeService.getEmployeeById(
-      params.employeeId
-    );
+    const employee = await this.employeeService.getEmployeeById(params.id);
     ResponseEntity.ok(res, employee);
   });
 
@@ -36,7 +34,7 @@ export class EmployeeController {
     const { body, params } = await validate(EmployeeUpdateRequestDto, req);
     const updatedEmployee = await this.employeeService.updateEmployee(
       body,
-      params.employeeId
+      params.id
     );
     ResponseEntity.ok(res, updatedEmployee);
   });
@@ -44,7 +42,7 @@ export class EmployeeController {
   public deleteEmployeeById = catchAsync(
     async (req: Request, res: Response) => {
       const { params } = await validate(EmployeeIdRequestDto, req);
-      await this.employeeService.deleteEmployeeById(params.employeeId);
+      await this.employeeService.deleteEmployeeById(params.id);
       ResponseEntity.noContent(res);
     }
   );

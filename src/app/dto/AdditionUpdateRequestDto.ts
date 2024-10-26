@@ -17,6 +17,6 @@ export const AdditionUpdateRequestDto = z.object({
   }),
 
   params: z.object({
-    additionId: z.string().transform((additionId) => parseInt(additionId)),
+    id: z.string({message: "Addition ID Required"}).transform((id) => parseInt(id)),
   }),
 });

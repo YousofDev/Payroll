@@ -30,16 +30,3 @@ container.register("EmployeeController", EmployeeController);
 container.register("AdditionTypeController", AdditionTypeController);
 container.register("DeductionTypeController", DeductionTypeController);
 container.register("AdditionController", AdditionController);
-
-export const controllers = {
-  employeeController:
-    container.resolve<EmployeeController>("EmployeeController"),
-  additionTypeController: container.resolve<AdditionTypeController>(
-    "AdditionTypeController"
-  ),
-  deductionTypeController: container.resolve<DeductionTypeController>(
-    "DeductionTypeController"
-  ),
-  additionController:
-    container.resolve<AdditionController>("AdditionController"),
-};

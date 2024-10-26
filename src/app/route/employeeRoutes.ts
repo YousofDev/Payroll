@@ -1,27 +1,22 @@
 import { Router } from "express";
+import { container } from "@config/dependencyContainer";
 import { EmployeeController } from "@app/controller/EmployeeController";
+import { env } from "@config/env";
 
-export const createEmployeeRoutes = (controller: EmployeeController) => {
-  const router = Router();
+const path = `${env.API_VERSION}/employees`;
 
-  router.get("/api/v1/employees", controller.getAllEmployees.bind(controller));
+const controller = container.resolve<EmployeeController>("EmployeeController");
 
-  router.post("/api/v1/employees", controller.createEmployee.bind(controller));
+const router = Router();
 
-  router.get(
-    "/api/v1/employees/:employeeId",
-    controller.getEmployeeById.bind(controller)
-  );
+router.get(`${path}`, controller.getAllEmployees);
 
-  router.put(
-    "/api/v1/employees/:employeeId",
-    controller.updateEmployee.bind(controller)
-  );
+router.post(`${path}`, controller.createEmployee);
 
-  router.delete(
-    "/api/v1/employees/:employeeId",
-    controller.deleteEmployeeById.bind(controller)
-  );
+router.get(`${path}/:id`, controller.getEmployeeById);
 
-  return router;
-};
+router.put(`${path}/:id`, controller.updateEmployee);
+
+router.delete(`${path}/:id`, controller.deleteEmployeeById);
+
+export const employeeRoutes = router;

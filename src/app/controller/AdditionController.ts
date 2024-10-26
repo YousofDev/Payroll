@@ -30,9 +30,7 @@ export class AdditionController {
   public getAdditionById = catchAsync(async (req: Request, res: Response) => {
     const { params } = await validate(AdditionIdRequestDto, req);
 
-    const addition = await this.additionService.getAdditionById(
-      params.additionId
-    );
+    const addition = await this.additionService.getAdditionById(params.id);
 
     ResponseEntity.ok(res, addition);
   });
@@ -40,10 +38,7 @@ export class AdditionController {
   public updateAddition = catchAsync(async (req: Request, res: Response) => {
     const { body, params } = await validate(AdditionUpdateRequestDto, req);
 
-    const addition = await this.additionService.updateAddition(
-      body,
-      params.additionId
-    );
+    const addition = await this.additionService.updateAddition(body, params.id);
 
     ResponseEntity.ok(res, addition);
   });
@@ -52,7 +47,7 @@ export class AdditionController {
     async (req: Request, res: Response) => {
       const { params } = await validate(AdditionIdRequestDto, req);
 
-      await this.additionService.deleteAdditionById(params.additionId);
+      await this.additionService.deleteAdditionById(params.id);
 
       ResponseEntity.noContent(res);
     }

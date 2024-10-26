@@ -40,9 +40,7 @@ export class DeductionTypeController {
       const { params } = await validate(DeductionTypeIdRequestDto, req);
 
       const deductionType =
-        await this.deductionTypeService.getDeductionTypeById(
-          params.deductionTypeId
-        );
+        await this.deductionTypeService.getDeductionTypeById(params.id);
 
       ResponseEntity.ok(res, deductionType);
     }
@@ -57,7 +55,7 @@ export class DeductionTypeController {
 
       const deductionType = await this.deductionTypeService.updateDeductionType(
         body,
-        params.deductionTypeId
+        params.id
       );
 
       ResponseEntity.ok(res, deductionType);
@@ -68,9 +66,7 @@ export class DeductionTypeController {
     async (req: Request, res: Response) => {
       const { params } = await validate(DeductionTypeIdRequestDto, req);
 
-      await this.deductionTypeService.deleteDeductionTypeById(
-        params.deductionTypeId
-      );
+      await this.deductionTypeService.deleteDeductionTypeById(params.id);
 
       ResponseEntity.noContent(res);
     }

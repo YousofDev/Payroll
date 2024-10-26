@@ -23,7 +23,7 @@ export const EmployeeUpdateRequestDto = z.object({
         message: "Salary must be a valid number",
       })
       .transform((val) => val.toString()),
-      
+
     hireDate: z
       .string()
       .optional()
@@ -43,8 +43,6 @@ export const EmployeeUpdateRequestDto = z.object({
   }),
 
   params: z.object({
-    employeeId: z
-      .string()
-      .transform((employeeId) => parseInt(employeeId)),
+    id: z.string({message: "Employee ID Required"}).transform((id) => parseInt(id)),
   }),
 });

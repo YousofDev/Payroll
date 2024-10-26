@@ -1,32 +1,24 @@
 import { Router } from "express";
+import { container } from "@config/dependencyContainer";
 import { AdditionTypeController } from "@app/controller/AdditionTypeController";
 import { env } from "@config/env";
 
-export const createAdditionTypeRoutes = (
-  controller: AdditionTypeController
-) => {
-  const router = Router();
+const path = `${env.API_VERSION}/addition-types`;
 
-  const basePath = `${env.API_VERSION}/addition-types`;
+const controller = container.resolve<AdditionTypeController>(
+  "AdditionTypeController"
+);
 
-  router.get(`${basePath}`, controller.getAllAdditionTypes.bind(controller));
+const router = Router();
 
-  router.post(`${basePath}`, controller.createAdditionType.bind(controller));
+router.get(`${path}`, controller.getAllAdditionTypes);
 
-  router.get(
-    `${basePath}/:additionTypeId`,
-    controller.getAdditionTypeById.bind(controller)
-  );
+router.post(`${path}`, controller.createAdditionType);
 
-  router.put(
-    `${basePath}/:additionTypeId`,
-    controller.updateAdditionType.bind(controller)
-  );
+router.get(`${path}/:id`, controller.getAdditionTypeById);
 
-  router.delete(
-    `${basePath}/:additionTypeId`,
-    controller.deleteAdditionTypeById.bind(controller)
-  );
+router.put(`${path}/:id`, controller.updateAdditionType);
 
-  return router;
-};
+router.delete(`${path}/:id`, controller.deleteAdditionTypeById);
+
+export const additionTypeRoutes = router;
