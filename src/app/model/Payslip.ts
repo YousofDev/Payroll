@@ -29,8 +29,8 @@ export const Payslip = pgTable(
     companyName: varchar("company_name", { length: 100 }),
     companyAddress: varchar("company_address"),
     companyLogo: varchar("company_logo"),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => {
     return {

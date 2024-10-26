@@ -20,8 +20,8 @@ export const Employee = pgTable("employees", {
   salary: decimal("salary", { precision: 10, scale: 2 }).notNull(),
   hireDate: date("hire_date"),
   terminationDate: date("termination_date"),
-  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type NewEmployeeModel = InferInsertModel<typeof Employee>;

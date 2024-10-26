@@ -12,8 +12,8 @@ export const DeductionType = pgTable("deduction_types", {
   name: varchar("name", { length: 100 }).notNull(),
   description: varchar("description"),
   frequencyType: FrequencyType().notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export type NewDeductionTypeModel = InferInsertModel<typeof DeductionType>;

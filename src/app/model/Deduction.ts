@@ -22,8 +22,8 @@ export const Deduction = pgTable("deductions", {
   }),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   frequencyType: FrequencyType().notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export type NewDeductionModel = InferInsertModel<typeof Deduction>;

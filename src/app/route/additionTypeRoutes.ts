@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { EmployeeController } from "@app/controller/EmployeeController";
 import { AdditionTypeController } from "@app/controller/AdditionTypeController";
 import { env } from "@config/env";
 
