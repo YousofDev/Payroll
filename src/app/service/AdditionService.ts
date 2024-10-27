@@ -5,6 +5,8 @@ import { EmployeeRepository } from "@app/repository/EmployeeRepository";
 import { AdditionRepository } from "@app/repository/AdditionRepository";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
+import { FrequencyType } from "@data/pgEnums";
+import { BadRequestException } from "@exception/BadRequestException";
 
 export class AdditionService {
   public constructor(
@@ -16,15 +18,37 @@ export class AdditionService {
   }
 
   public async createAddition(additionDto: NewAdditionModel) {
+    // Ensure the employee exists
     await this.employeeRepository.getEmployeeOrThrowException(
       additionDto.employeeId
     );
+
+    // Ensure the addition type exists
     await this.additionTypeRepository.getAdditionTypeOrThrowException(
       additionDto.additionTypeId
     );
 
-    const addition = await this.additionRepository.createAddition(additionDto);
-    return new AdditionResponseDto(addition);
+    // Ensure the addition with type MONTHLY can be added once per employee
+    const additionType =
+      await this.additionRepository.getAdditionByAdditionTypeId(
+        additionDto.additionTypeId,
+        additionDto.employeeId
+      );
+
+    if (additionType.frequencyType == FrequencyType.enumValues[0]) {
+      throw new BadRequestException(
+        "This MONTHLY addition already added to this employee"
+      );
+    }
+
+    const newAddition =
+      await this.additionRepository.createAddition(additionDto);
+
+    return new AdditionResponseDto({
+      ...newAddition,
+      name: additionType.name,
+      description: additionType.description,
+    });
   }
 
   public async getAllAdditions() {
@@ -42,23 +66,50 @@ export class AdditionService {
     additionDto: NewAdditionModel,
     additionId: number
   ) {
+    // Ensure the addition exists
     await this.additionRepository.getAdditionOrThrowException(additionId);
+
+    // Ensure the employee exists
     await this.employeeRepository.getEmployeeOrThrowException(
       additionDto.employeeId
     );
+
+    // Ensure the addition type exists
     await this.additionTypeRepository.getAdditionTypeOrThrowException(
       additionDto.additionTypeId
     );
 
-    const addition = await this.additionRepository.updateAddition(
+    // Ensure the addition with type MONTHLY can be added once per employee
+    const additionType =
+      await this.additionRepository.getAdditionByAdditionTypeId(
+        additionDto.additionTypeId,
+        additionDto.employeeId
+      );
+
+    if (additionType.frequencyType == FrequencyType.enumValues[0]) {
+      throw new BadRequestException(
+        "This MONTHLY addition already added to this employee"
+      );
+    }
+
+    await this.additionTypeRepository.getAdditionTypeOrThrowException(
+      additionDto.additionTypeId
+    );
+
+    const updatedAddition = await this.additionRepository.updateAddition(
       additionDto,
       additionId
     );
-    return new AdditionResponseDto(addition);
+
+    return new AdditionResponseDto({
+      ...updatedAddition,
+      name: additionType.name,
+      description: additionType.description,
+    });
   }
 
   public async deleteAdditionById(additionId: number) {
     await this.additionRepository.getAdditionOrThrowException(additionId);
-    this.additionRepository.deleteAdditionById(additionId);
+    await this.additionRepository.deleteAdditionById(additionId);
   }
 }

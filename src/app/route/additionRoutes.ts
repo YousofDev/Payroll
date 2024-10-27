@@ -9,9 +9,9 @@ const controller = container.resolve<AdditionController>("AdditionController");
 
 const router = Router();
 
-router.get(`${path}`, controller.getAllAdditions);
+router.post(path, controller.createAddition);
 
-router.post(`${path}`, controller.createAddition);
+router.get(path, controller.getAllAdditions);
 
 router.get(`${path}/:id`, controller.getAdditionById);
 

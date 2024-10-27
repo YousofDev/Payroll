@@ -9,9 +9,9 @@ import {
 
 export const AdditionType = pgTable("addition_types", {
   id: serial("id").primaryKey(),
+  frequencyType: FrequencyType("frequency_type").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
-  description: varchar("description"),
-  frequencyType: FrequencyType().notNull(),
+  description: varchar("description"),  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

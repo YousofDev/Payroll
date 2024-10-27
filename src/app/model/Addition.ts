@@ -8,7 +8,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { Employee } from "./Employee";
 import { AdditionType } from "./AdditionType";
-import { FrequencyType } from "@data/pgEnums";
 
 export const Addition = pgTable("additions", {
   id: serial("id").primaryKey(),
@@ -21,7 +20,6 @@ export const Addition = pgTable("additions", {
     })
     .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  frequencyType: FrequencyType().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

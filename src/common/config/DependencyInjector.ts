@@ -1,6 +1,6 @@
 type Constructor<T = any> = new (...args: any[]) => T;
 
-export class DependencyService {
+export class DependencyInjector {
   private dependencies: Map<string, any> = new Map();
   private singletons: Map<string, any> = new Map();
 

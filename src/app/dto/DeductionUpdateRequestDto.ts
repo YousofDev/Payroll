@@ -3,17 +3,12 @@ import { frequencyType } from "@util/constants";
 
 export const DeductionUpdateRequestDto = z.object({
   body: z.object({
-    deductionTypeId: z.number(),
-    employeeId: z.number(),
-    frequencyType: z.enum(frequencyType),
+    deductionTypeId: z.number().int().positive(),
+    employeeId: z.number().int().positive(),
     amount: z
-      .union([
-        z.string().refine((value) => /^[0-9]+(\.[0-9]+)?$/.test(value)),
-        z.number().min(1),
-      ])
-      .transform((val) => (typeof val === "string" ? parseFloat(val) : val))
-      .refine((value) => Number.isFinite(value))
-      .transform((val) => val.toString()),
+    .number()
+    .positive()
+    .transform((val) => val.toString()),
   }),
 
   params: z.object({

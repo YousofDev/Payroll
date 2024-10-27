@@ -4,7 +4,7 @@ export const FrequencyType = pgEnum("frequency_type", ["MONTHLY", "SPECIAL"]);
 
 export const Direction = pgEnum("direction", ["ADDITION", "DEDUCTION"]);
 
-export const PayslipStatus = pgEnum("payslip_status ", [
+export const PayslipStatus = pgEnum("payslip_status", [
   "DRAFT",
   "PROCESSED",
   "PAID",

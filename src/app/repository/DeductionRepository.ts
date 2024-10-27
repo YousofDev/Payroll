@@ -3,10 +3,12 @@ import {
   DeductionModel,
   NewDeductionModel,
 } from "@app/model/Deduction";
+import { DeductionType } from "@app/model/DeductionType";
 import { DatabaseClient } from "@data/DatabaseClient";
+import { FrequencyType } from "@data/pgEnums";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { eq } from "drizzle-orm";
+import { eq, and, lte, gte } from "drizzle-orm";
 
 export class DeductionRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
@@ -27,16 +29,116 @@ export class DeductionRepository {
     return deduction;
   }
 
-  public async getAllDeductions(): Promise<DeductionModel[]> {
-    return await this.db.select().from(Deduction);
+  public async getAllDeductions() {
+    return await this.db
+      .select({
+        id: Deduction.id,
+        employeeId: Deduction.employeeId,
+        deductionTypeId: Deduction.deductionTypeId,
+        frequencyType: DeductionType.frequencyType,
+        amount: Deduction.amount,
+        name: DeductionType.name,
+        description: DeductionType.description,
+        createdAt: Deduction.createdAt,
+        updatedAt: Deduction.updatedAt,
+      })
+      .from(Deduction)
+      .innerJoin(
+        DeductionType,
+        eq(Deduction.deductionTypeId, DeductionType.id)
+      );
   }
 
-  public async getDeductionById(deductionId: number): Promise<DeductionModel> {
+  public async getDeductionById(deductionId: number) {
     return await this.db
-      .select()
+      .select({
+        id: Deduction.id,
+        employeeId: Deduction.employeeId,
+        deductionTypeId: Deduction.deductionTypeId,
+        frequencyType: DeductionType.frequencyType,
+        amount: Deduction.amount,
+        name: DeductionType.name,
+        description: DeductionType.description,
+        createdAt: Deduction.createdAt,
+        updatedAt: Deduction.updatedAt,
+      })
       .from(Deduction)
+      .innerJoin(DeductionType, eq(Deduction.deductionTypeId, DeductionType.id))
       .where(eq(Deduction.id, deductionId))
       .then((rows) => rows[0]);
+  }
+
+  public async getDeductionByDeductionTypeId(
+    deductionTypeId: number,
+    employeeId: number
+  ) {
+    return await this.db
+      .select({
+        frequencyType: DeductionType.frequencyType,
+        name: DeductionType.name,
+        description: DeductionType.description,
+      })
+      .from(Deduction)
+      .innerJoin(DeductionType, eq(Deduction.deductionTypeId, DeductionType.id))
+      .where(
+        and(
+          eq(Deduction.deductionTypeId, deductionTypeId),
+          eq(Deduction.employeeId, employeeId)
+        )
+      )
+      .then((rows) => rows[0]);
+  }
+
+  public async getMonthlyDeductionsByEmployeeId(employeeId: number) {
+    return await this.db
+      .select({
+        id: Deduction.id,
+        employeeId: Deduction.employeeId,
+        deductionTypeId: Deduction.deductionTypeId,
+        frequencyType: DeductionType.frequencyType,
+        amount: Deduction.amount,
+        name: DeductionType.name,
+        description: DeductionType.description,
+        createdAt: Deduction.createdAt,
+        updatedAt: Deduction.updatedAt,
+      })
+      .from(Deduction)
+      .innerJoin(DeductionType, eq(Deduction.deductionTypeId, DeductionType.id))
+      .where(
+        and(
+          eq(Deduction.employeeId, employeeId),
+          eq(DeductionType.frequencyType, FrequencyType.enumValues[0])
+        )
+      );
+  }
+
+  public async getSpecialDeductionsByEmployeeId(
+    employeeId: number,
+    payPeriodStart: string,
+    payPeriodEnd: string
+  ) {
+    return await this.db
+      .select({
+        id: Deduction.id,
+        employeeId: Deduction.employeeId,
+        deductionTypeId: Deduction.deductionTypeId,
+        frequencyType: DeductionType.frequencyType,
+        amount: Deduction.amount,
+        name: DeductionType.name,
+        description: DeductionType.description,
+        createdAt: Deduction.createdAt,
+        updatedAt: Deduction.updatedAt,
+      })
+      .from(Deduction)
+      .innerJoin(DeductionType, eq(Deduction.deductionTypeId, DeductionType.id))
+      .where(
+        and(
+          eq(Deduction.employeeId, employeeId),
+          eq(DeductionType.frequencyType, FrequencyType.enumValues[1]),
+          gte(Deduction.createdAt, new Date(payPeriodStart)),
+          lte(Deduction.createdAt, new Date(payPeriodEnd))
+        )
+      );
   }
 
   public async updateDeduction(

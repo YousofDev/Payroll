@@ -1,8 +1,10 @@
 import { Addition, AdditionModel, NewAdditionModel } from "@app/model/Addition";
+import { AdditionType } from "@app/model/AdditionType";
 import { DatabaseClient } from "@data/DatabaseClient";
+import { Direction, FrequencyType } from "@data/pgEnums";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { eq } from "drizzle-orm";
+import { and, eq, sql, gte, lte } from "drizzle-orm";
 
 export class AdditionRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
@@ -23,16 +25,108 @@ export class AdditionRepository {
     return addition;
   }
 
-  public async getAllAdditions(): Promise<AdditionModel[]> {
-    return await this.db.select().from(Addition);
+  public async getAllAdditions() {
+    return await this.db
+      .select({
+        id: Addition.id,
+        employeeId: Addition.employeeId,
+        additionTypeId: Addition.additionTypeId,
+        frequencyType: AdditionType.frequencyType,
+        amount: Addition.amount,
+        name: AdditionType.name,
+        description: AdditionType.description,
+        createdAt: Addition.createdAt,
+        updatedAt: Addition.updatedAt,
+      })
+      .from(Addition)
+      .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id));
   }
 
-  public async getAdditionById(additionId: number): Promise<AdditionModel> {
+  public async getAdditionById(additionId: number) {
     return await this.db
-      .select()
+      .select({
+        id: Addition.id,
+        employeeId: Addition.employeeId,
+        additionTypeId: Addition.additionTypeId,
+        frequencyType: AdditionType.frequencyType,
+        amount: Addition.amount,
+        name: AdditionType.name,
+        description: AdditionType.description,
+        createdAt: Addition.createdAt,
+        updatedAt: Addition.updatedAt,
+      })
       .from(Addition)
+      .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
       .where(eq(Addition.id, additionId))
       .then((rows) => rows[0]);
+  }
+
+  public async getAdditionByAdditionTypeId(
+    additionTypeId: number,
+    employeeId: number
+  ) {
+    return await this.db
+      .select({
+        frequencyType: AdditionType.frequencyType,
+        name: AdditionType.name,
+        description: AdditionType.description,
+      })
+      .from(Addition)
+      .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
+      .where(
+        and(
+          eq(Addition.additionTypeId, additionTypeId),
+          eq(Addition.employeeId, employeeId)
+        )
+      )
+      .then((rows) => rows[0]);
+  }
+
+  public async getMonthlyAdditionsByEmployeeId(employeeId: number) {
+    return await this.db
+      .select({
+        name: AdditionType.name,
+        amount: Addition.amount,
+        employeeId: Addition.employeeId,
+        additionTypeId: Addition.additionTypeId,
+        frequencyType: AdditionType.frequencyType,
+        createdAt: Addition.createdAt,
+        // direction: sql`${Direction.enumValues[0]}`,
+      })
+      .from(Addition)
+      .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
+      .where(
+        and(
+          eq(Addition.employeeId, employeeId),
+          eq(AdditionType.frequencyType, FrequencyType.enumValues[0])
+        )
+      );
+  }
+
+  public async getSpecialAdditionsByEmployeeId(
+    employeeId: number,
+    payPeriodStart: string,
+    payPeriodEnd: string
+  ) {
+    return await this.db
+      .select({
+        name: AdditionType.name,
+        amount: Addition.amount,
+        employeeId: Addition.employeeId,
+        additionTypeId: Addition.additionTypeId,
+        frequencyType: AdditionType.frequencyType,
+        createdAt: Addition.createdAt,
+      })
+      .from(Addition)
+      .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
+      .where(
+        and(
+          eq(Addition.employeeId, employeeId),
+          eq(AdditionType.frequencyType, FrequencyType.enumValues[1]),
+          gte(Addition.createdAt, new Date(payPeriodStart)),
+          lte(Addition.createdAt, new Date(payPeriodEnd))
+        )
+      );
   }
 
   public async updateAddition(

@@ -9,40 +9,17 @@ export const EmployeeUpdateRequestDto = z.object({
     position: z.string().optional(),
     department: z.string().optional(),
     location: z.string().optional(),
-
     salary: z
-      .union([
-        z.string().refine((value) => /^[0-9]+(\.[0-9]+)?$/.test(value), {
-          message:
-            "Salary must be a valid number (digits and optional decimal point only)",
-        }),
-        z.number().min(1, "Salary must be a non-negative number"),
-      ])
-      .transform((val) => (typeof val === "string" ? parseFloat(val) : val))
-      .refine((value) => Number.isFinite(value), {
-        message: "Salary must be a valid number",
-      })
+      .number()
+      .positive()
       .transform((val) => val.toString()),
-
-    hireDate: z
-      .string()
-      .optional()
-      .nullable()
-      .refine(
-        (date) => (date ? !isNaN(Date.parse(date)) : true),
-        "Invalid date format"
-      ),
-    terminationDate: z
-      .string()
-      .optional()
-      .nullable()
-      .refine(
-        (date) => (date ? !isNaN(Date.parse(date)) : true),
-        "Invalid date format"
-      ),
+    hireDate: z.date().optional(),
+    terminationDate: z.date().optional(),
   }),
 
   params: z.object({
-    id: z.string({message: "Employee ID Required"}).transform((id) => parseInt(id)),
+    id: z
+      .string({ message: "Employee ID Required" })
+      .transform((id) => parseInt(id)),
   }),
 });

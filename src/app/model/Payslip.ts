@@ -5,7 +5,6 @@ import {
   pgTable,
   serial,
   timestamp,
-  unique,
   varchar,
   date,
 } from "drizzle-orm/pg-core";
@@ -15,42 +14,38 @@ import { Direction, PayslipStatus } from "@data/pgEnums";
 export const Payslip = pgTable(
   "payslips",
   {
-    id: serial("id").primaryKey(),    
-    employeeId: integer("employee_id").references(() => Employee.id, {
-      onDelete: "cascade",
-    }),
-    startDate: date("start_date").notNull(),
-    endDate: date("end_date").notNull(),
-    payslipStatus: PayslipStatus().notNull(),
+    id: serial("id").primaryKey(),
+    employeeId: integer("employee_id")
+      .references(() => Employee.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    payPeriodStart: date("pay_period_start").notNull(),
+    payPeriodEnd: date("pay_period_end").notNull(),
+    payslipStatus: PayslipStatus("payslip_status").notNull(),
     basicSalary: decimal("basic_salary").notNull(),
     totalAdditions: decimal("total_additions").notNull(),
     totalDeductions: decimal("total_deductions").notNull(),
     netSalary: decimal("net_salary").notNull(),
-    companyName: varchar("company_name", { length: 100 }),
-    companyAddress: varchar("company_address"),
+    employeeName: varchar("employee_name", { length: 100 }).notNull(),
+    companyName: varchar("company_name", { length: 100 }).notNull(),
+    companyAddress: varchar("company_address").notNull(),
     companyLogo: varchar("company_logo"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
-  },
-  (table) => {
-    return {
-      uniquePayslip: unique("unique_employee_payslip_period").on(
-        table.employeeId,
-        table.startDate,
-        table.endDate
-      ),
-    };
   }
 );
 
 export const PayslipItem = pgTable("payslip_items", {
   id: serial("id").primaryKey(),
-  payslipId: integer("payslip_id").references(() => Payslip.id, {
-    onDelete: "cascade",
-  }),
+  payslipId: integer("payslip_id")
+    .references(() => Payslip.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   description: varchar("description"),
-  direction: Direction().notNull(),
+  direction: Direction("direction").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 });
 
@@ -60,6 +55,9 @@ export type PayslipModel = InferSelectModel<typeof Payslip>;
 export type NewPayslipItemModel = InferInsertModel<typeof PayslipItem>;
 export type PayslipItemModel = InferSelectModel<typeof PayslipItem>;
 
-export interface PayslipWithItems extends PayslipModel {
-  items?: PayslipItemModel[];
+export interface NewPayslipModelWithItems extends NewPayslipModel {
+  payslipItems: NewPayslipItemModel[];
+}
+export interface PayslipModelWithItems extends PayslipModel {
+  payslipItems: PayslipItemModel[];
 }

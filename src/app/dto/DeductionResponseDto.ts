@@ -1,20 +1,33 @@
 import { DeductionModel } from "@app/model/Deduction";
 
+interface DeductionDetails {
+  id: number;
+  employeeId: number;
+  deductionTypeId: number;
+  amount: string;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class DeductionResponseDto {
   id: number;
-  deductionTypeId: number;
   employeeId: number;
+  deductionTypeId: number;
   amount: string;
-  frequencyType: "MONTHLY" | "SPECIAL";
+  name: string;
+  description: string | null;
   createdAt: Date;
   updatedAt: Date;
 
-  constructor(deduction: DeductionModel) {
+  constructor(deduction: DeductionDetails) {
     this.id = deduction.id;
-    this.deductionTypeId = deduction.deductionTypeId;
     this.employeeId = deduction.employeeId;
+    this.deductionTypeId = deduction.deductionTypeId;
     this.amount = deduction.amount;
-    this.frequencyType = deduction.frequencyType;
+    this.name = deduction.name;
+    this.description = deduction.description;
     this.createdAt = deduction.createdAt;
     this.updatedAt = deduction.updatedAt;
   }

@@ -1,5 +1,6 @@
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
+  boolean,
   decimal,
   integer,
   pgTable,
@@ -8,7 +9,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { Employee } from "./Employee";
 import { DeductionType } from "./DeductionType";
-import { FrequencyType } from "@data/pgEnums";
 
 export const Deduction = pgTable("deductions", {
   id: serial("id").primaryKey(),
@@ -21,7 +21,6 @@ export const Deduction = pgTable("deductions", {
     })
     .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  frequencyType: FrequencyType().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
