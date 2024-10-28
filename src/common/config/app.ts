@@ -1,3 +1,4 @@
+import "@config/dependencyContainer";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
@@ -5,6 +6,7 @@ import helmet from "helmet";
 import * as dotenv from "dotenv";
 import { morganMiddleware } from "@util/logger";
 import { env } from "@config/env";
+import { jwtAuthenticationFilter } from "@middleware/jwtAuthenticationFilter";
 
 dotenv.config();
 
@@ -26,3 +28,5 @@ app.use(cors(corsOptions));
 app.use(express.static("public"));
 app.use(express.static("views"));
 app.set("view engine", "ejs");
+
+app.use(jwtAuthenticationFilter);

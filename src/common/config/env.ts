@@ -17,8 +17,8 @@ export const env = zennv({
     JWT_SECRET: z.string(),
     ACCESS_TOKEN_SECRET: z.string(),
     REFRESH_TOKEN_SECRET: z.string(),
-    ACCESS_TOKEN_EXPIRE: z.string(),
-    REFRESH_TOKEN_EXPIRE: z.string(),
+    ACCESS_TOKEN_EXPIRES_IN: z.string().transform((val) => parseInt(val)),
+    REFRESH_TOKEN_EXPIRES_IN: z.string().transform((val) => parseInt(val)),
     COOKIE_EXPIRE: z.number().default(15),
     EMAIL_FROM: z.string(),
     EMAIL_HOST: z.string(),
@@ -26,6 +26,6 @@ export const env = zennv({
     EMAIL_USERNAME: z.string(),
     EMAIL_PASSWORD: z.string(),
     DEBUG: z.string(),
-    API_VERSION: z.string()
+    API_VERSION: z.string(),
   }),
 });
