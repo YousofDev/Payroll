@@ -17,7 +17,9 @@ export class AdditionService {
     logger.info("AdditionService initialized");
   }
 
-  public async createAddition(additionDto: NewAdditionModel) {
+  public async createAddition(
+    additionDto: NewAdditionModel
+  ): Promise<AdditionResponseDto> {
     // Ensure the employee exists
     await this.employeeRepository.getEmployeeOrThrowException(
       additionDto.employeeId
@@ -51,12 +53,14 @@ export class AdditionService {
     });
   }
 
-  public async getAllAdditions() {
+  public async getAllAdditions(): Promise<AdditionResponseDto[]> {
     const additions = await this.additionRepository.getAllAdditions();
     return additions.map((add) => new AdditionResponseDto(add));
   }
 
-  public async getAdditionById(additionId: number) {
+  public async getAdditionById(
+    additionId: number
+  ): Promise<AdditionResponseDto> {
     const addition =
       await this.additionRepository.getAdditionOrThrowException(additionId);
     return new AdditionResponseDto(addition);
@@ -65,7 +69,7 @@ export class AdditionService {
   public async updateAddition(
     additionDto: NewAdditionModel,
     additionId: number
-  ) {
+  ): Promise<AdditionResponseDto> {
     // Ensure the addition exists
     await this.additionRepository.getAdditionOrThrowException(additionId);
 

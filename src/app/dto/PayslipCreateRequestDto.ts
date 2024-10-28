@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { payslipStatus } from "@util/constants";
+import { payslipStatus } from "@config/constants";
 
 export const PayslipCreateRequestDto = z.object({
   body: z

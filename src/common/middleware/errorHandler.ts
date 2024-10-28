@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import { BusinessException } from "@exception/BusinessException";
 import { logger } from "@util/logger";
@@ -9,8 +9,8 @@ interface ErrorResponse {
   details?: string[];
 }
 
-const errorHandler = (
-  err: unknown,
+export const errorHandler = (
+  err: ErrorRequestHandler,
   req: Request,
   res: Response,
   next: NextFunction
@@ -37,9 +37,11 @@ const errorHandler = (
     }
   }
 
-  logger.error(`${err}`);
+  if (err instanceof Error && err.stack) {
+    logger.error(err.stack);
+  } else {
+    logger.error(`${err}`);
+  }
 
   res.status(response.status).json(response);
 };
-
-export default errorHandler;

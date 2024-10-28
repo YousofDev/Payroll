@@ -13,8 +13,18 @@ export const EmployeeUpdateRequestDto = z.object({
       .number()
       .positive()
       .transform((val) => val.toString()),
-    hireDate: z.date().optional(),
-    terminationDate: z.date().optional(),
+    hireDate: z
+      .string()
+      .refine((dateString) => !isNaN(Date.parse(dateString)), {
+        message: "Invalid date format for hireDate",
+      })
+      .optional(),
+    terminationDate: z
+      .string()
+      .refine((dateString) => !isNaN(Date.parse(dateString)), {
+        message: "Invalid date format for terminationDate",
+      })
+      .optional(),
   }),
 
   params: z.object({

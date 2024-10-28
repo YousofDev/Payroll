@@ -2,6 +2,7 @@ import { Router } from "express";
 import { container } from "@config/dependencyContainer";
 import { DeductionTypeController } from "@app/controller/DeductionTypeController";
 import { env } from "@config/env";
+import { catchRouteErrors } from "@util/catchRouteErrors";
 
 const path = `${env.API_VERSION}/deduction-types`;
 
@@ -11,14 +12,19 @@ const controller = container.resolve<DeductionTypeController>(
 
 const router = Router();
 
-router.get(`${path}`, controller.getAllDeductionTypes);
+router.get(`${path}`, controller.getAllDeductionTypes.bind(controller));
 
-router.post(`${path}`, controller.createDeductionType);
+router.post(`${path}`, controller.createDeductionType.bind(controller));
 
-router.get(`${path}/:id`, controller.getDeductionTypeById);
+router.get(`${path}/:id`, controller.getDeductionTypeById.bind(controller));
 
-router.put(`${path}/:id`, controller.updateDeductionType);
+router.put(`${path}/:id`, controller.updateDeductionType.bind(controller));
 
-router.delete(`${path}/:id`, controller.deleteDeductionTypeById);
+router.delete(
+  `${path}/:id`,
+  controller.deleteDeductionTypeById.bind(controller)
+);
+
+catchRouteErrors(router);
 
 export const deductionTypeRoutes = router;

@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { frequencyType } from "@util/constants";
-
+import { frequencyType } from "@config/constants";
 
 export const AdditionTypeCreateRequestDto = z.object({
   body: z.object({

@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { logger } from "@util/logger";
 import { validate } from "@util/validate";
-import { catchAsync } from "@util/catchAsync";
 import { ResponseEntity } from "@util/ResponseEntity";
 import { DeductionTypeService } from "@app/service/DeductionTypeService";
 import { DeductionTypeCreateRequestDto } from "@app/dto/DeductionTypeCreateRequestDto";
@@ -15,60 +14,39 @@ export class DeductionTypeController {
     logger.info("DeductionTypeController initialized");
   }
 
-  public getAllDeductionTypes = catchAsync(
-    async (req: Request, res: Response) => {
-      const deductionTypes =
-        await this.deductionTypeService.getAllDeductionTypes();
+  public async getAllDeductionTypes(req: Request, res: Response) {
+    const deductionTypes =
+      await this.deductionTypeService.getAllDeductionTypes();
+    ResponseEntity.ok(res, deductionTypes);
+  }
 
-      ResponseEntity.ok(res, deductionTypes);
-    }
-  );
+  public async createDeductionType(req: Request, res: Response) {
+    const { body } = await validate(DeductionTypeCreateRequestDto, req);
+    const deductionType =
+      await this.deductionTypeService.createDeductionType(body);
+    ResponseEntity.created(res, deductionType);
+  }
 
-  public createDeductionType = catchAsync(
-    async (req: Request, res: Response) => {
-      const { body } = await validate(DeductionTypeCreateRequestDto, req);
+  public async getDeductionTypeById(req: Request, res: Response) {
+    const { params } = await validate(DeductionTypeIdRequestDto, req);
+    const deductionType = await this.deductionTypeService.getDeductionTypeById(
+      params.id
+    );
+    ResponseEntity.ok(res, deductionType);
+  }
 
-      const deductionType =
-        await this.deductionTypeService.createDeductionType(body);
+  public async updateDeductionType(req: Request, res: Response) {
+    const { body, params } = await validate(DeductionTypeUpdateRequestDto, req);
+    const deductionType = await this.deductionTypeService.updateDeductionType(
+      body,
+      params.id
+    );
+    ResponseEntity.ok(res, deductionType);
+  }
 
-      ResponseEntity.created(res, deductionType);
-    }
-  );
-
-  public getDeductionTypeById = catchAsync(
-    async (req: Request, res: Response) => {
-      const { params } = await validate(DeductionTypeIdRequestDto, req);
-
-      const deductionType =
-        await this.deductionTypeService.getDeductionTypeById(params.id);
-
-      ResponseEntity.ok(res, deductionType);
-    }
-  );
-
-  public updateDeductionType = catchAsync(
-    async (req: Request, res: Response) => {
-      const { body, params } = await validate(
-        DeductionTypeUpdateRequestDto,
-        req
-      );
-
-      const deductionType = await this.deductionTypeService.updateDeductionType(
-        body,
-        params.id
-      );
-
-      ResponseEntity.ok(res, deductionType);
-    }
-  );
-
-  public deleteDeductionTypeById = catchAsync(
-    async (req: Request, res: Response) => {
-      const { params } = await validate(DeductionTypeIdRequestDto, req);
-
-      await this.deductionTypeService.deleteDeductionTypeById(params.id);
-
-      ResponseEntity.noContent(res);
-    }
-  );
+  public async deleteDeductionTypeById(req: Request, res: Response) {
+    const { params } = await validate(DeductionTypeIdRequestDto, req);
+    await this.deductionTypeService.deleteDeductionTypeById(params.id);
+    ResponseEntity.noContent(res);
+  }
 }

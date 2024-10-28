@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { frequencyType } from "@util/constants";
+import { frequencyType } from "@config/constants";
 
 export const DeductionTypeUpdateRequestDto = z.object({
   body: z.object({
@@ -10,7 +10,7 @@ export const DeductionTypeUpdateRequestDto = z.object({
 
   params: z.object({
     id: z
-      .string({message: "Deduction type ID Required"})
+      .string({ message: "Deduction type ID Required" })
       .transform((id) => parseInt(id)),
   }),
 });

@@ -42,6 +42,24 @@ export class AdditionRepository {
       .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id));
   }
 
+  public async getAllAdditionsByEmployeeId(employeeId: number) {
+    return await this.db
+      .select({
+        id: Addition.id,
+        employeeId: Addition.employeeId,
+        additionTypeId: Addition.additionTypeId,
+        frequencyType: AdditionType.frequencyType,
+        amount: Addition.amount,
+        name: AdditionType.name,
+        description: AdditionType.description,
+        createdAt: Addition.createdAt,
+        updatedAt: Addition.updatedAt,
+      })
+      .from(Addition)
+      .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
+      .where(eq(Addition.employeeId, employeeId));
+  }
+
   public async getAdditionById(additionId: number) {
     return await this.db
       .select({

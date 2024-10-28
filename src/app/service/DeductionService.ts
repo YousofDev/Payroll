@@ -17,7 +17,9 @@ export class DeductionService {
     logger.info("DeductionService initialized");
   }
 
-  public async createDeduction(deductionDto: NewDeductionModel) {
+  public async createDeduction(
+    deductionDto: NewDeductionModel
+  ): Promise<DeductionResponseDto> {
     // Ensure the employee exists
     await this.employeeRepository.getEmployeeOrThrowException(
       deductionDto.employeeId
@@ -51,12 +53,14 @@ export class DeductionService {
     });
   }
 
-  public async getAllDeductions() {
+  public async getAllDeductions(): Promise<DeductionResponseDto[]> {
     const deductions = await this.deductionRepository.getAllDeductions();
     return deductions.map((add) => new DeductionResponseDto(add));
   }
 
-  public async getDeductionById(deductionId: number) {
+  public async getDeductionById(
+    deductionId: number
+  ): Promise<DeductionResponseDto> {
     const deduction =
       await this.deductionRepository.getDeductionOrThrowException(deductionId);
     return new DeductionResponseDto(deduction);
@@ -65,7 +69,7 @@ export class DeductionService {
   public async updateDeduction(
     deductionDto: NewDeductionModel,
     deductionId: number
-  ) {
+  ): Promise<DeductionResponseDto> {
     // Ensure deduction exists
     await this.deductionRepository.getDeductionOrThrowException(deductionId);
 

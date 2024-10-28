@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { NotFoundException } from "@exception/NotFoundException";
 
-export const handleUndefinedRoutes = (
+export const undefinedRoutesHandler = (
   req: Request,
   res: Response,
   next: NextFunction
