@@ -1,3 +1,4 @@
+import { eq, sql } from "drizzle-orm";
 import {
   PayslipItemResponseDto,
   PayslipResponseDto,
@@ -15,7 +16,7 @@ import {
 import { DatabaseClient } from "@data/DatabaseClient";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { eq, sql } from "drizzle-orm";
+
 import { PreparedPayslipType } from "@app/dto/PreparedPayslipType";
 import { Direction } from "@data/pgEnums";
 
@@ -24,6 +25,47 @@ export class PayslipRepository {
 
   public constructor() {
     logger.info("PayslipRepository initialized");
+  }
+
+  public async generatePayslip(payslip: PreparedPayslipType) {
+    return await this.db.transaction(async (trx) => {
+      // Insert the payslip record
+      const newPayslip = await trx
+        .insert(Payslip)
+        .values(payslip)
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Map additions and deductions
+      const payslipItems = [
+        ...payslip.additions.map((item) => ({
+          ...item,
+          payslipId: newPayslip.id,
+          direction: Direction.enumValues[0],
+        })),
+        ...payslip.deductions.map((item) => ({
+          ...item,
+          payslipId: newPayslip.id,
+          direction: Direction.enumValues[1],
+        })),
+      ];
+
+      // Insert payslip items within the same transaction
+      const newPayslipItems = await trx
+        .insert(PayslipItem)
+        .values(payslipItems)
+        .returning();
+
+      // Separate additions and deductions for response
+      const additions = newPayslipItems.filter(
+        (item) => item.direction === Direction.enumValues[0]
+      );
+      const deductions = newPayslipItems.filter(
+        (item) => item.direction === Direction.enumValues[1]
+      );
+
+      return new PayslipResponseDto(newPayslip, additions, deductions);
+    });
   }
 
   public async createPayslip(payslip: PreparedPayslipType) {
@@ -115,32 +157,6 @@ export class PayslipRepository {
     );
 
     return new PayslipResponseDto(payslip, additions, deductions);
-  }
-
-  public async updatePayslip(
-    payslipId: number,
-    payslipDto: NewPayslipModelWithItems
-  ) {
-    const updatedPayslip = await this.db
-      .update(Payslip)
-      .set(payslipDto)
-      .where(eq(Payslip.id, payslipId))
-      .returning()
-      .then((rows) => rows[0]);
-
-    await this.db.delete(PayslipItem).where(eq(PayslipItem.id, payslipId));
-
-    const newPayslipItems = await this.db
-      .insert(PayslipItem)
-      .values(
-        payslipDto.payslipItems.map((item) => ({
-          ...item,
-          payslipId: updatedPayslip.id,
-        }))
-      )
-      .returning();
-
-    // return new PayslipResponseDto(updatedPayslip, newPayslipItems);
   }
 
   public async deletePayslipById(payslipId: number): Promise<void> {

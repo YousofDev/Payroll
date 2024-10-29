@@ -25,7 +25,7 @@ router.get(
 
 router.patch(
   `${path}/:id/assign-role`,
-  // hasAuthority("ADMIN"),
+  hasAuthority("ADMIN"),
   controller.assignRole.bind(controller)
 );
 

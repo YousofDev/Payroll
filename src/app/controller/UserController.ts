@@ -48,6 +48,6 @@ export class UserController {
   public async assignRole(req: Request, res: Response) {
     const { body, params } = await validate(UserAssignRoleRequestDto, req);
     await this.userService.assignUserRole(body, params.id);
-    ResponseEntity.ok(res);
+    ResponseEntity.ok(res, { message: "Role assigned successfully" });
   }
 }

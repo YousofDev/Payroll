@@ -2,7 +2,7 @@ import { env } from "@config/env";
 import { app } from "@config/app";
 import { logger } from "@util/logger";
 import { undefinedRoutesHandler } from "@middleware/undefinedRoutesHandler";
-import { errorHandler } from "@middleware/errorHandler";
+import { globalErrorHandler } from "@middleware/globalErrorHandler";
 import { userRoutes } from "@app/route/userRoutes";
 import { employeeRoutes } from "@app/route/employeeRoutes";
 import { additionTypeRoutes } from "@app/route/additionTypeRoutes";
@@ -20,7 +20,7 @@ app.use(deductionRoutes);
 app.use(payslipRoutes);
 
 app.all("*", undefinedRoutesHandler);
-app.use(errorHandler);
+app.use(globalErrorHandler);
 
 const server = app.listen(env.PORT, `${env.HOST}`, () => {
   logger.info(`Server Started on http://${env.HOST}:${env.PORT}`);

@@ -22,4 +22,10 @@ export class PayslipController {
     const payslip = await this.payslipService.getPayslipById(params.id);
     ResponseEntity.ok(res, payslip);
   }
+
+  public async deletePayslipById(req: Request, res: Response) {
+    const { params } = await validate(PayslipIdRequestDto, req);
+    await this.payslipService.deletePayslipById(params.id);
+    ResponseEntity.noContent(res);
+  }
 }

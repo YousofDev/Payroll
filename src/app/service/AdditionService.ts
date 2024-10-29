@@ -21,23 +21,28 @@ export class AdditionService {
     additionDto: NewAdditionModel
   ): Promise<AdditionResponseDto> {
     // Ensure the employee exists
+
     await this.employeeRepository.getEmployeeOrThrowException(
       additionDto.employeeId
     );
 
     // Ensure the addition type exists
-    await this.additionTypeRepository.getAdditionTypeOrThrowException(
-      additionDto.additionTypeId
-    );
+    const additionType =
+      await this.additionTypeRepository.getAdditionTypeOrThrowException(
+        additionDto.additionTypeId
+      );
 
     // Ensure the addition with type MONTHLY can be added once per employee
-    const additionType =
+    const additionTypeExists =
       await this.additionRepository.getAdditionByAdditionTypeId(
         additionDto.additionTypeId,
         additionDto.employeeId
       );
 
-    if (additionType.frequencyType == FrequencyType.enumValues[0]) {
+    if (
+      additionTypeExists &&
+      additionTypeExists.frequencyType == FrequencyType.enumValues[0]
+    ) {
       throw new BadRequestException(
         "This MONTHLY addition already added to this employee"
       );
@@ -48,8 +53,8 @@ export class AdditionService {
 
     return new AdditionResponseDto({
       ...newAddition,
-      name: additionType.name,
-      description: additionType.description,
+      name: additionType && additionType.name,
+      description: additionType && additionType.description,
     });
   }
 
@@ -79,18 +84,22 @@ export class AdditionService {
     );
 
     // Ensure the addition type exists
-    await this.additionTypeRepository.getAdditionTypeOrThrowException(
-      additionDto.additionTypeId
-    );
+    const additionType =
+      await this.additionTypeRepository.getAdditionTypeOrThrowException(
+        additionDto.additionTypeId
+      );
 
     // Ensure the addition with type MONTHLY can be added once per employee
-    const additionType =
+    const additionTypeExists =
       await this.additionRepository.getAdditionByAdditionTypeId(
         additionDto.additionTypeId,
         additionDto.employeeId
       );
 
-    if (additionType.frequencyType == FrequencyType.enumValues[0]) {
+    if (
+      additionTypeExists &&
+      additionType.frequencyType == FrequencyType.enumValues[0]
+    ) {
       throw new BadRequestException(
         "This MONTHLY addition already added to this employee"
       );
@@ -107,8 +116,8 @@ export class AdditionService {
 
     return new AdditionResponseDto({
       ...updatedAddition,
-      name: additionType.name,
-      description: additionType.description,
+      name: additionType && additionType.name,
+      description: additionType && additionType.description,
     });
   }
 

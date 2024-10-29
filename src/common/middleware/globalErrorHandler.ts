@@ -9,7 +9,7 @@ interface ErrorResponse {
   details?: string[];
 }
 
-export const errorHandler = (
+export const globalErrorHandler = (
   err: ErrorRequestHandler,
   req: Request,
   res: Response,

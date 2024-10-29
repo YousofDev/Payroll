@@ -26,18 +26,22 @@ export class DeductionService {
     );
 
     // Ensure the deduction type exists
-    await this.deductionTypeRepository.getDeductionTypeOrThrowException(
-      deductionDto.deductionTypeId
-    );
+    const deductionType =
+      await this.deductionTypeRepository.getDeductionTypeOrThrowException(
+        deductionDto.deductionTypeId
+      );
 
     // Ensure the deduction with type MONTHLY can be added once per employee
-    const deductionType =
+    const deductionTypeExists =
       await this.deductionRepository.getDeductionByDeductionTypeId(
         deductionDto.deductionTypeId,
         deductionDto.employeeId
       );
 
-    if (deductionType.frequencyType == FrequencyType.enumValues[0]) {
+    if (
+      deductionTypeExists &&
+      deductionTypeExists.frequencyType == FrequencyType.enumValues[0]
+    ) {
       throw new BadRequestException(
         "This MONTHLY addition already added to this employee"
       );
@@ -48,8 +52,8 @@ export class DeductionService {
 
     return new DeductionResponseDto({
       ...newDeduction,
-      name: deductionType.name,
-      description: deductionType.description,
+      name: deductionType && deductionType.name,
+      description: deductionType && deductionType.description,
     });
   }
 
@@ -79,18 +83,22 @@ export class DeductionService {
     );
 
     // Ensure the deduction type exists
-    await this.deductionTypeRepository.getDeductionTypeOrThrowException(
-      deductionDto.deductionTypeId
-    );
+    const deductionType =
+      await this.deductionTypeRepository.getDeductionTypeOrThrowException(
+        deductionDto.deductionTypeId
+      );
 
     // Ensure the deduction with type MONTHLY can be added once per employee
-    const deductionType =
+    const deductionTypeExists =
       await this.deductionRepository.getDeductionByDeductionTypeId(
         deductionDto.deductionTypeId,
         deductionDto.employeeId
       );
 
-    if (deductionType.frequencyType == FrequencyType.enumValues[0]) {
+    if (
+      deductionTypeExists &&
+      deductionTypeExists.frequencyType == FrequencyType.enumValues[0]
+    ) {
       throw new BadRequestException(
         "This MONTHLY addition already added to this employee"
       );
@@ -103,8 +111,8 @@ export class DeductionService {
 
     return new DeductionResponseDto({
       ...deduction,
-      name: deductionType.name,
-      description: deductionType.description,
+      name: deductionType && deductionType.name,
+      description: deductionType && deductionType.description,
     });
   }
 

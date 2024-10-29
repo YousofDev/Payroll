@@ -9,6 +9,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "pnpm run clean && tsc && tsc-alias",
+    "seed": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only ./src/common/data/seeds.ts",
     "start": "node dist/src/server.js",
     "prod": "pnpm run build && pnpm start",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only ./src/server.ts",

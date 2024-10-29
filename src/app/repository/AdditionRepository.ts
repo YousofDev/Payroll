@@ -6,6 +6,12 @@ import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 import { and, eq, sql, gte, lte } from "drizzle-orm";
 
+interface AdditionDto {
+  additionTypeId: number;
+  employeeId: number;
+  amount: string;
+}
+
 export class AdditionRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
@@ -14,7 +20,7 @@ export class AdditionRepository {
   }
 
   public async createAddition(
-    additionDto: NewAdditionModel
+    additionDto: AdditionDto
   ): Promise<AdditionModel> {
     const addition = await this.db
       .insert(Addition)

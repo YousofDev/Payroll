@@ -11,8 +11,11 @@ import {
   PayslipModel,
 } from "@app/model/Payslip";
 import { PreparedPayslipType } from "@app/dto/PreparedPayslipType";
+import { DatabaseClient } from "@data/DatabaseClient";
 
 export class PayslipService {
+  private readonly db = DatabaseClient.getInstance().getConnection();
+
   public constructor(
     private readonly payslipRepository: PayslipRepository,
     private readonly employeeRepository: EmployeeRepository,
@@ -87,7 +90,7 @@ export class PayslipService {
       deductions: [...monthlyDeductions, ...specialDeductions],
     };
 
-    const newPayslip = await this.payslipRepository.createPayslip(payslip);
+    const newPayslip = await this.payslipRepository.generatePayslip(payslip);
 
     return newPayslip;
   }
@@ -98,5 +101,10 @@ export class PayslipService {
 
   public async getPayslipById(payslipId: number) {
     return await this.payslipRepository.getPayslipById(payslipId);
+  }
+
+  public async deletePayslipById(payslipId: number): Promise<void> {
+    await this.payslipRepository.getPayslipOrThrowException(payslipId);
+    await this.payslipRepository.deletePayslipById(payslipId);
   }
 }
