@@ -6,7 +6,7 @@ import { catchRouteErrors } from "@util/catchRouteErrors";
 
 const path = `${env.API_VERSION}/employees`;
 
-const controller = container.resolve<EmployeeController>("EmployeeController");
+const controller = container.resolve(EmployeeController);
 
 const router = Router();
 

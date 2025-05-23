@@ -8,9 +8,7 @@ import { EmployeeUpdateRequestDto } from "@app/dto/EmployeeUpdateRequestDto";
 import { EmployeeIdRequestDto } from "@app/dto/EmployeeIdRequestDto";
 
 export class EmployeeController {
-  public constructor(private readonly employeeService: EmployeeService) {
-    logger.info("EmployeeController initialized");
-  }
+  public constructor(private readonly employeeService: EmployeeService) {}
 
   public async getAllEmployees(req: Request, res: Response) {
     const employees = await this.employeeService.getAllEmployees();

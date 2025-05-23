@@ -7,7 +7,7 @@ import { hasAuthority } from "@middleware/hasAuthority";
 
 const path = `${env.API_VERSION}/users`;
 
-const controller = container.resolve<UserController>("UserController");
+const controller = container.resolve(UserController);
 
 const router = Router();
 

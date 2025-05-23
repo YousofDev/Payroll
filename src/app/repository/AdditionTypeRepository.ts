@@ -11,9 +11,7 @@ import { eq } from "drizzle-orm";
 export class AdditionTypeRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("AdditionTypeRepository initialized");
-  }
+  public constructor() {}
 
   public async createAdditionType(
     additionTypeDto: NewAdditionTypeModel

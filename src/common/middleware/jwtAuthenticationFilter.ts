@@ -18,35 +18,39 @@ export const jwtAuthenticationFilter = catchMiddlewareErrors(
       return next();
     }
 
-    if (authorization == undefined) {
-      throw new AuthenticationException("Authentication Bearer missing");
+    if (authorization == undefined || authorization.length == 0) {
+      throw new AuthenticationException("Authentication credentials missing");
     }
 
-    if (authorization.startsWith("Bearer")) {
-      token = authorization.split(" ")[1];
+    try {
+      if (authorization.startsWith("Bearer")) {
+        token = authorization.split(" ")[1];
 
-      const jwtUtil = container.resolve<JwtUtil>("JwtUtil");
+        const jwtUtil = container.resolve(JwtUtil);
 
-      const payload = await jwtUtil.verifyAccessToken(token);
-      
-      if (payload == undefined || payload?.userEmail == undefined) {
-        throw new AuthenticationException();
+        const payload = await jwtUtil.verifyAccessToken(token);
+
+        if (payload == undefined || payload?.userEmail == undefined) {
+          throw new AuthenticationException("Invalid credentials");
+        }
+
+        userEmail = payload.userEmail;
+
+        const userService = container.resolve(UserService);
+
+        const user = await userService.getUserByEmail(userEmail);
+
+        if (!user) {
+          throw new AuthenticationException("Invalid credentials");
+        }
+
+        req.userEmail = user.email;
+        req.userRole = user.role;
+
+        return next();
       }
-
-      userEmail = payload.userEmail;
-
-      const userService = container.resolve<UserService>("UserService");
-
-      const user = await userService.getUserByEmail(userEmail);
-
-      if (!user) {
-        throw new AuthenticationException();
-      }
-
-      req.userEmail = user.email;
-      req.userRole = user.role;
+    } catch (error) {
+      throw new AuthenticationException("Invalid credentials");
     }
-
-    next();
   }
 );

@@ -13,9 +13,7 @@ export class DeductionService {
     private readonly employeeRepository: EmployeeRepository,
     private readonly deductionTypeRepository: DeductionTypeRepository,
     private readonly deductionRepository: DeductionRepository
-  ) {
-    logger.info("DeductionService initialized");
-  }
+  ) {}
 
   public async createDeduction(
     deductionDto: NewDeductionModel

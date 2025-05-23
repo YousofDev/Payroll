@@ -15,9 +15,7 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly jwtUtil: JwtUtil,
     private readonly passwordEncoder: PasswordEncoder
-  ) {
-    logger.info("UserService initialized");
-  }
+  ) {}
 
   public async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.getAllUsers();

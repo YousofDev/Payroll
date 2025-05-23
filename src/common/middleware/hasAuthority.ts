@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { catchMiddlewareErrors } from "@util/catchMiddlewareErrors";
 import { AuthorizationException } from "@exception/AuthorizationException";
 import { UserRole } from "@config/constants";
+import { logger } from "@util/logger";
 
 export const hasAuthority = (...roles: UserRole[]) =>
   catchMiddlewareErrors(

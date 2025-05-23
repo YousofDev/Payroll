@@ -5,9 +5,7 @@ import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 
 export class EmployeeService {
-  public constructor(private readonly employeeRepository: EmployeeRepository) {
-    logger.info("EmployeeService initialized");
-  }
+  public constructor(private readonly employeeRepository: EmployeeRepository) {}
 
   public async getAllEmployees() {
     const employees = await this.employeeRepository.getAllEmployees();

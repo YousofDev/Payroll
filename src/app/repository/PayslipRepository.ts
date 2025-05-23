@@ -1,117 +1,124 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, and, between, inArray, sql } from "drizzle-orm";
 import {
   PayslipItemResponseDto,
   PayslipResponseDto,
 } from "@app/dto/PayslipResponseDto";
-import { PayslipCreateRequestDto } from "@app/dto/PayslipCreateRequestDto";
-import {
-  Payslip,
-  PayslipModel,
-  NewPayslipModelWithItems,
-  PayslipModelWithItems,
-  PayslipItem,
-  PayslipItemModel,
-  NewPayslipItemModel,
-} from "@app/model/Payslip";
+import { PayslipCreateRequestDtoType } from "@app/dto/PayslipCreateRequestDto";
+import { Payslip, PayslipItem, PayslipItemModel } from "@app/model/Payslip";
 import { DatabaseClient } from "@data/DatabaseClient";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 
 import { PreparedPayslipType } from "@app/dto/PreparedPayslipType";
 import { Direction } from "@data/pgEnums";
+import { DatabaseException } from "@exception/DatabaseException";
+import { BadRequestException } from "@exception/BadRequestException";
 
 export class PayslipRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("PayslipRepository initialized");
-  }
+  public constructor() {}
 
-  public async generatePayslip(payslip: PreparedPayslipType) {
-    return await this.db.transaction(async (trx) => {
-      // Insert the payslip record
-      const newPayslip = await trx
-        .insert(Payslip)
-        .values(payslip)
-        .returning()
-        .then((rows) => rows[0]);
+  /**
+   * Creates a new payslip with its items in a transaction
+   */
+  public async createPayslip(
+    payslip: PreparedPayslipType
+  ): Promise<PayslipResponseDto> {
+    try {
+      return await this.db.transaction(async (trx) => {
+        // Insert the payslip record
+        const [newPayslip] = await trx
+          .insert(Payslip)
+          .values(payslip)
+          .returning();
 
-      // Map additions and deductions
-      const payslipItems = [
-        ...payslip.additions.map((item) => ({
-          ...item,
-          payslipId: newPayslip.id,
-          direction: Direction.enumValues[0],
-        })),
-        ...payslip.deductions.map((item) => ({
-          ...item,
-          payslipId: newPayslip.id,
-          direction: Direction.enumValues[1],
-        })),
-      ];
+        // Prepare payslip items
+        const payslipItems = this.preparePayslipItems(payslip, newPayslip.id);
 
-      // Insert payslip items within the same transaction
-      const newPayslipItems = await trx
-        .insert(PayslipItem)
-        .values(payslipItems)
-        .returning();
+        // Insert payslip items if any exist
+        let newPayslipItems: PayslipItemModel[] = [];
+        if (payslipItems.length > 0) {
+          newPayslipItems = await trx
+            .insert(PayslipItem)
+            .values(payslipItems)
+            .returning();
+        }
 
-      // Separate additions and deductions for response
-      const additions = newPayslipItems.filter(
-        (item) => item.direction === Direction.enumValues[0]
-      );
-      const deductions = newPayslipItems.filter(
-        (item) => item.direction === Direction.enumValues[1]
-      );
+        // Separate items by direction for the response
+        const additions = newPayslipItems.filter(
+          (item) => item.direction === Direction.enumValues[0]
+        );
+        const deductions = newPayslipItems.filter(
+          (item) => item.direction === Direction.enumValues[1]
+        );
 
-      return new PayslipResponseDto(newPayslip, additions, deductions);
-    });
-  }
-
-  public async createPayslip(payslip: PreparedPayslipType) {
-    const newPayslip = await this.db
-      .insert(Payslip)
-      .values(payslip)
-      .returning()
-      .then((rows) => rows[0]);
-
-    // Map additions and deductions
-    const payslipAdditions = payslip.additions?.length
-      ? payslip.additions.map((item) => ({
-          ...item,
-          payslipId: newPayslip.id,
-          direction: Direction.enumValues[0],
-        }))
-      : [];
-
-    const payslipDeductions = payslip.deductions?.length
-      ? payslip.deductions.map((item) => ({
-          ...item,
-          payslipId: newPayslip.id,
-          direction: Direction.enumValues[1],
-        }))
-      : [];
-
-    // Combine items only if they are non-empty
-    const items = [...payslipAdditions, ...payslipDeductions];
-    if (items.length) {
-      const newPayslipItems = await this.db
-        .insert(PayslipItem)
-        .values(items)
-        .returning();
-
-      const additions = newPayslipItems.filter(
-        (item) => item.direction == Direction.enumValues[0]
-      );
-      const deductions = newPayslipItems.filter(
-        (item) => item.direction == Direction.enumValues[1]
-      );
-
-      return new PayslipResponseDto(newPayslip, additions, deductions);
+        return new PayslipResponseDto(newPayslip, additions, deductions);
+      });
+    } catch (error) {
+      logger.error("Error creating payslip:", error);
+      throw new DatabaseException("Failed to create payslip");
     }
+  }
 
-    // Return empty additions and deductions if no items were added
-    return new PayslipResponseDto(newPayslip, [], []);
+  /**
+   * Prepares payslip items for insertion
+   */
+  private preparePayslipItems(payslip: PreparedPayslipType, payslipId: number) {
+    const additionItems = (payslip.additions || []).map((item) => ({
+      name: item.name,
+      amount: item.amount,
+      employeeId: item.employeeId,
+      additionTypeId: item.additionTypeId,
+      createdAt: item.createdAt,
+      payslipId,
+      direction: Direction.enumValues[0],
+    }));
+
+    const deductionItems = (payslip.deductions || []).map((item) => ({
+      name: item.name,
+      amount: item.amount,
+      employeeId: item.employeeId,
+      deductionTypeId: item.deductionTypeId,
+      createdAt: item.createdAt,
+      payslipId,
+      direction: Direction.enumValues[1],
+    }));
+
+    return [...additionItems, ...deductionItems];
+  }
+
+  /**
+   * Validates the payslip period for multiple employees to prevent duplicates
+   */
+  public async validatePayslipPeriodForEmployees(
+    payslipDto: PayslipCreateRequestDtoType
+  ): Promise<void> {
+    const existingPayslips = await this.db
+      .select()
+      .from(Payslip)
+      .where(
+        and(
+          inArray(Payslip.employeeId, payslipDto.employeeIds),
+          between(
+            Payslip.payPeriodStart,
+            payslipDto.payPeriodStart,
+            payslipDto.payPeriodEnd
+          ),
+          between(
+            Payslip.payPeriodEnd,
+            payslipDto.payPeriodStart,
+            payslipDto.payPeriodEnd
+          )
+        )
+      );
+
+    if (existingPayslips.length > 0) {
+      const employeeIds = existingPayslips.map((p) => p.employeeId).join(", ");
+      throw new BadRequestException(
+        `Payslips already exist for employees ${employeeIds} in the specified period`
+      );
+    }
   }
 
   public async getAllPayslips() {
@@ -133,6 +140,10 @@ export class PayslipRepository {
       },
       {} as Record<number, PayslipItemResponseDto[]>
     );
+
+    return payslips.map((payslip) => new PayslipResponseDto(payslip, [], []));
+
+    // return new PayslipResponseDto(payslips, [], [])
 
     // return payslips.map(
     //   (payslip) =>

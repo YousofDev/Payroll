@@ -7,14 +7,17 @@ import { ResponseEntity } from "@util/ResponseEntity";
 import { PayslipIdRequestDto } from "@app/dto/PayslipIdRequestDto";
 
 export class PayslipController {
-  public constructor(private readonly payslipService: PayslipService) {
-    logger.info("PayslipController initialized");
+  public constructor(private readonly payslipService: PayslipService) {}
+
+  public async generatePayslips(req: Request, res: Response) {
+    const { body } = await validate(PayslipCreateRequestDto, req);
+    const payslip = await this.payslipService.generatePayslips(body);
+    ResponseEntity.created(res, payslip);
   }
 
-  public async generatePayslip(req: Request, res: Response) {
-    const { body } = await validate(PayslipCreateRequestDto, req);
-    const payslip = await this.payslipService.generatePayslip(body);
-    ResponseEntity.created(res, payslip);
+  public async getAllPayslips(req: Request, res: Response) {
+    const payslips = await this.payslipService.getAllPayslips();
+    ResponseEntity.ok(res, payslips);
   }
 
   public async getPayslipById(req: Request, res: Response) {

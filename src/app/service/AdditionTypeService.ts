@@ -5,9 +5,9 @@ import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 
 export class AdditionTypeService {
-  public constructor(private readonly additionTypeRepository: AdditionTypeRepository) {
-    logger.info("AdditionTypeService initialized");
-  }
+  public constructor(
+    private readonly additionTypeRepository: AdditionTypeRepository
+  ) {}
 
   public async createAdditionType(additionTypeDto: NewAdditionTypeModel) {
     const additionType =

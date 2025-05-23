@@ -11,9 +11,7 @@ import { eq } from "drizzle-orm";
 export class DeductionTypeRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("DeductionTypeRepository initialized");
-  }
+  public constructor() {}
 
   public async createDeductionType(
     deductionTypeDto: NewDeductionTypeModel

@@ -3,7 +3,6 @@ import { env } from "@config/env";
 export const permittedRoutes = [
   `${env.API_VERSION}/users/register`,
   `${env.API_VERSION}/users/login`,
-  // `${env.API_VERSION}/employees`,
 ];
 
 export const frequencyType = ["MONTHLY", "SPECIAL"] as const;

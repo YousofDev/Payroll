@@ -7,9 +7,7 @@ import { logger } from "@util/logger";
 export class DeductionTypeService {
   public constructor(
     private readonly deductionTypeRepository: DeductionTypeRepository
-  ) {
-    logger.info("DeductionTypeService initialized");
-  }
+  ) {}
 
   public async createDeductionType(deductionTypeDto: NewDeductionTypeModel) {
     const deductionType =

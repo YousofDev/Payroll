@@ -8,9 +8,7 @@ import { AdditionUpdateRequestDto } from "@app/dto/AdditionUpdateRequestDto";
 import { AdditionIdRequestDto } from "@app/dto/AdditionIdRequestDto";
 
 export class AdditionController {
-  public constructor(private readonly additionService: AdditionService) {
-    logger.info("AdditionController initialized");
-  }
+  public constructor(private readonly additionService: AdditionService) {}
 
   public async getAllAdditions(req: Request, res: Response) {
     const additions = await this.additionService.getAllAdditions();

@@ -4,7 +4,7 @@ import { payslipStatus } from "@config/constants";
 export const PayslipCreateRequestDto = z.object({
   body: z
     .object({
-      employeeIds: z.array(z.number().int().positive()).min(1),
+      employeeId: z.number().int().positive(),
       payPeriodStart: z
         .string()
         .refine((dateString) => !isNaN(Date.parse(dateString)), {

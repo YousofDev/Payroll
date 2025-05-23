@@ -6,9 +6,7 @@ import { catchRouteErrors } from "@util/catchRouteErrors";
 
 const path = `${env.API_VERSION}/addition-types`;
 
-const controller = container.resolve<AdditionTypeController>(
-  "AdditionTypeController"
-);
+const controller = container.resolve(AdditionTypeController);
 
 const router = Router();
 

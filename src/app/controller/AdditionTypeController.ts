@@ -10,9 +10,7 @@ import { AdditionTypeIdRequestDto } from "@app/dto/AdditionTypeIdRequestDto";
 export class AdditionTypeController {
   public constructor(
     private readonly additionTypeService: AdditionTypeService
-  ) {
-    logger.info("AdditionTypeController initialized");
-  }
+  ) {}
 
   public async getAllAdditionTypes(req: Request, res: Response) {
     const additionTypes = await this.additionTypeService.getAllAdditionTypes();

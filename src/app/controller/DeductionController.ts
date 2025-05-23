@@ -8,9 +8,7 @@ import { DeductionUpdateRequestDto } from "@app/dto/DeductionUpdateRequestDto";
 import { DeductionIdRequestDto } from "@app/dto/DeductionIdRequestDto";
 
 export class DeductionController {
-  public constructor(private readonly deductionService: DeductionService) {
-    logger.info("DeductionController initialized");
-  }
+  public constructor(private readonly deductionService: DeductionService) {}
 
   public async getAllDeductions(req: Request, res: Response) {
     const deductions = await this.deductionService.getAllDeductions();

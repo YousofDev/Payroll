@@ -8,14 +8,12 @@ import { DatabaseClient } from "@data/DatabaseClient";
 import { FrequencyType } from "@data/pgEnums";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { eq, and, lte, gte } from "drizzle-orm";
+import { eq, and, lte, gte, between } from "drizzle-orm";
 
 export class DeductionRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("DeductionRepository initialized");
-  }
+  public constructor() {}
 
   public async createDeduction(
     deductionDto: NewDeductionModel
@@ -136,7 +134,11 @@ export class DeductionRepository {
           eq(Deduction.employeeId, employeeId),
           eq(DeductionType.frequencyType, FrequencyType.enumValues[1]),
           gte(Deduction.createdAt, new Date(payPeriodStart)),
-          lte(Deduction.createdAt, new Date(payPeriodEnd))
+          between(
+            Deduction.createdAt,
+            new Date(payPeriodStart),
+            new Date(payPeriodEnd)
+          )
         )
       );
   }

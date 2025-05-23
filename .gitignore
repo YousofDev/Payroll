@@ -1,5 +1,6 @@
 
 src/common/data/migrations/
+framework/
 
 # Logs
 logs/

@@ -13,9 +13,7 @@ export class AdditionService {
     private readonly employeeRepository: EmployeeRepository,
     private readonly additionTypeRepository: AdditionTypeRepository,
     private readonly additionRepository: AdditionRepository
-  ) {
-    logger.info("AdditionService initialized");
-  }
+  ) {}
 
   public async createAddition(
     additionDto: NewAdditionModel

@@ -5,13 +5,15 @@ import { PayslipController } from "@app/controller/PayslipController";
 import { catchRouteErrors } from "@util/catchRouteErrors";
 import { hasAuthority } from "@middleware/hasAuthority";
 
-const controller = container.resolve<PayslipController>("PayslipController");
+const controller = container.resolve(PayslipController);
 
 const path = `${env.API_VERSION}/payslips`;
 
 const router = Router();
 
-router.post(path, controller.generatePayslip.bind(controller));
+router.get(path, controller.getAllPayslips.bind(controller));
+
+router.post(path, controller.generatePayslips.bind(controller));
 
 router.get(`${path}/:id`, controller.getPayslipById.bind(controller));
 

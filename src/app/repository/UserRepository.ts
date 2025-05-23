@@ -11,9 +11,7 @@ import { eq } from "drizzle-orm";
 export class UserRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("UserRepository initialized");
-  }
+  public constructor() {}
 
   public async getAllUsers() {
     return await this.db.select().from(User);

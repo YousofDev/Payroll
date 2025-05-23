@@ -10,9 +10,7 @@ import { DeductionTypeIdRequestDto } from "@app/dto/DeductionTypeIdRequestDto";
 export class DeductionTypeController {
   public constructor(
     private readonly deductionTypeService: DeductionTypeService
-  ) {
-    logger.info("DeductionTypeController initialized");
-  }
+  ) {}
 
   public async getAllDeductionTypes(req: Request, res: Response) {
     const deductionTypes =

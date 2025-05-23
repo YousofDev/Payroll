@@ -6,8 +6,8 @@ import { catchRouteErrors } from "@util/catchRouteErrors";
 
 const path = `${env.API_VERSION}/deduction-types`;
 
-const controller = container.resolve<DeductionTypeController>(
-  "DeductionTypeController"
+const controller = container.resolve(
+  DeductionTypeController
 );
 
 const router = Router();

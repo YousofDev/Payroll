@@ -1,4 +1,4 @@
-interface Additions {
+export interface PreparedAddition {
   name: string;
   amount: string;
   employeeId: number;
@@ -6,7 +6,7 @@ interface Additions {
   createdAt: Date;
 }
 
-interface Deductions {
+export interface PreparedDeduction {
   name: string;
   amount: string;
   employeeId: number;
@@ -27,6 +27,6 @@ export interface PreparedPayslipType {
   companyName: string;
   companyAddress: string;
   companyLogo: string | null;
-  additions: Additions[];
-  deductions: Deductions[];
+  additions: PreparedAddition[];
+  deductions: PreparedDeduction[];
 }

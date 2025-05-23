@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { logger } from "@util/logger";
 import { validate } from "@util/validate";
 import { ResponseEntity } from "@util/ResponseEntity";
 import { UserService } from "@app/service/UserService";
@@ -9,9 +8,7 @@ import { UserIdRequestDto } from "@app/dto/UserIdRequestDto";
 import { UserAssignRoleRequestDto } from "@app/dto/UserAssignRoleRequestDto";
 
 export class UserController {
-  public constructor(private readonly userService: UserService) {
-    logger.info("UserController initialized");
-  }
+  public constructor(private readonly userService: UserService) {}
 
   public async getAllUsers(req: Request, res: Response) {
     const users = await this.userService.getAllUsers();

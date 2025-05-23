@@ -9,14 +9,13 @@ export interface JwtPayload extends jwt.JwtPayload {
 }
 
 export class JwtUtil {
-  public constructor() {
-    logger.info("JwtUtil initialized");
-  }
-  async verifyAccessToken(token: string) {
+  public constructor() {}
+
+  public async verifyAccessToken(token: string) {
     return await this.verifyJwt(token, env.ACCESS_TOKEN_SECRET);
   }
 
-  async generateAccessToken(userEmail: string) {
+  public async generateAccessToken(userEmail: string) {
     return await this.createJwt(
       userEmail,
       { userEmail },
@@ -52,7 +51,7 @@ export class JwtUtil {
       const payload = jwt.verify(token, secret) as JwtPayload;
       return payload;
     } catch (error) {
-      throw new AuthenticationException("Invalid access token");
+      throw new AuthenticationException("Invalid credentials");
     }
   }
 }

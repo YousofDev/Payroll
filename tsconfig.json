@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strictPropertyInitialization": false,
     "lib": ["es2017", "esnext.asynciterable"],
     "typeRoots": ["./node_modules/@types", "./src/common/types"],
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./",

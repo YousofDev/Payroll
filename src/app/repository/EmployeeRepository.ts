@@ -7,9 +7,7 @@ import { NotFoundException } from "@exception/NotFoundException";
 export class EmployeeRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("EmployeeRepository initialized");
-  }
+  public constructor() {}
 
   public async createEmployee(
     employeeDto: NewEmployeeModel

@@ -4,32 +4,71 @@ import { logger } from "@util/logger";
 import { AdditionRepository } from "@app/repository/AdditionRepository";
 import { DeductionRepository } from "@app/repository/DeductionRepository";
 import { PayslipCreateRequestDtoType } from "@app/dto/PayslipCreateRequestDto";
-import {
-  NewPayslipItemModel,
-  NewPayslipModel,
-  PayslipItemModel,
-  PayslipModel,
-} from "@app/model/Payslip";
 import { PreparedPayslipType } from "@app/dto/PreparedPayslipType";
-import { DatabaseClient } from "@data/DatabaseClient";
+import { PayslipResponseDto } from "@app/dto/PayslipResponseDto";
+import { BusinessException } from "@exception/BusinessException";
+
+interface PayslipGenerationResult {
+  success: PayslipResponseDto[];
+  errors: Array<{
+    employeeId: number;
+    error: string;
+  }>;
+}
 
 export class PayslipService {
-  private readonly db = DatabaseClient.getInstance().getConnection();
-
   public constructor(
     private readonly payslipRepository: PayslipRepository,
     private readonly employeeRepository: EmployeeRepository,
     private readonly additionRepository: AdditionRepository,
     private readonly deductionRepository: DeductionRepository
   ) {
-    logger.info("PayslipService initialized");
   }
 
-  public async generatePayslip(payslipDto: PayslipCreateRequestDtoType) {
+  public async generatePayslips(
+    payslipDto: PayslipCreateRequestDtoType
+  ): Promise<PayslipGenerationResult> {
+    // Ensure there is no payslips for the any employee through pay period
+    await this.payslipRepository.validatePayslipPeriodForEmployees(payslipDto);
+
+    const result: PayslipGenerationResult = {
+      success: [],
+      errors: [],
+    };
+
+    // Process each employee
+    for (const employeeId of payslipDto.employeeIds) {
+      try {
+        const payslip = await this.generateSinglePayslip(
+          employeeId,
+          payslipDto
+        );
+        result.success.push(payslip);
+      } catch (error) {
+        logger.error(
+          `Error generating payslip for employee ${employeeId}:`,
+          error
+        );
+        result.errors.push({
+          employeeId,
+          error:
+            error instanceof BusinessException
+              ? error.message
+              : "Unknown error occurred",
+        });
+      }
+    }
+
+    return result;
+  }
+
+  private async generateSinglePayslip(
+    employeeId: number,
+    payslipDto: PayslipCreateRequestDtoType
+  ) {
     // 1- find employee by id
-    const employee = await this.employeeRepository.getEmployeeOrThrowException(
-      payslipDto.employeeId
-    );
+    const employee =
+      await this.employeeRepository.getEmployeeOrThrowException(employeeId);
 
     // 2- find MONTHLY additions by employee id
     const monthlyAdditions =
@@ -90,13 +129,15 @@ export class PayslipService {
       deductions: [...monthlyDeductions, ...specialDeductions],
     };
 
-    const newPayslip = await this.payslipRepository.generatePayslip(payslip);
-
-    return newPayslip;
+    return await this.payslipRepository.createPayslip(payslip);
   }
 
   private calculateTotal(items: any[]): number {
     return items.reduce((total, add) => total + (Number(add.amount) || 0), 0);
+  }
+
+  public async getAllPayslips() {
+    return await this.payslipRepository.getAllPayslips();
   }
 
   public async getPayslipById(payslipId: number) {

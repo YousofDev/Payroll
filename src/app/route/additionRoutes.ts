@@ -6,7 +6,7 @@ import { catchRouteErrors } from "@util/catchRouteErrors";
 
 const path = `${env.API_VERSION}/additions`;
 
-const controller = container.resolve<AdditionController>("AdditionController");
+const controller = container.resolve(AdditionController);
 
 const router = Router();
 

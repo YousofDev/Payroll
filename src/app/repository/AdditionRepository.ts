@@ -4,7 +4,7 @@ import { DatabaseClient } from "@data/DatabaseClient";
 import { Direction, FrequencyType } from "@data/pgEnums";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { and, eq, sql, gte, lte } from "drizzle-orm";
+import { and, eq, sql, gte, lte, between } from "drizzle-orm";
 
 interface AdditionDto {
   additionTypeId: number;
@@ -15,9 +15,7 @@ interface AdditionDto {
 export class AdditionRepository {
   private readonly db = DatabaseClient.getInstance().getConnection();
 
-  public constructor() {
-    logger.info("AdditionRepository initialized");
-  }
+  public constructor() {}
 
   public async createAddition(
     additionDto: AdditionDto
@@ -147,8 +145,11 @@ export class AdditionRepository {
         and(
           eq(Addition.employeeId, employeeId),
           eq(AdditionType.frequencyType, FrequencyType.enumValues[1]),
-          gte(Addition.createdAt, new Date(payPeriodStart)),
-          lte(Addition.createdAt, new Date(payPeriodEnd))
+          between(
+            Addition.createdAt,
+            new Date(payPeriodStart),
+            new Date(payPeriodEnd)
+          )
         )
       );
   }

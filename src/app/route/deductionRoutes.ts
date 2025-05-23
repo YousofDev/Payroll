@@ -4,8 +4,8 @@ import { env } from "@config/env";
 import { catchRouteErrors } from "@util/catchRouteErrors";
 import { DeductionController } from "@app/controller/DeductionController";
 
-const controller = container.resolve<DeductionController>(
-  "DeductionController"
+const controller = container.resolve(
+  DeductionController
 );
 
 const path = `${env.API_VERSION}/deductions`;
