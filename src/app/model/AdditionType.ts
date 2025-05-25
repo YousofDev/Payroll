@@ -1,17 +1,12 @@
-import { FrequencyType } from "@data/pgEnums";
+import { FrequencyType } from "@data/pgTypes";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import {
-  pgTable,
-  serial,
-  timestamp,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const AdditionType = pgTable("addition_types", {
   id: serial("id").primaryKey(),
   frequencyType: FrequencyType("frequency_type").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
-  description: varchar("description"),  
+  description: varchar("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

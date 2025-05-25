@@ -3,9 +3,9 @@ import { logger } from "@util/logger";
 import { validate } from "@util/validate";
 import { ResponseEntity } from "@util/ResponseEntity";
 import { AdditionTypeService } from "@app/service/AdditionTypeService";
-import { AdditionTypeCreateRequestDto } from "@app/dto/AdditionTypeCreateRequestDto";
-import { AdditionTypeUpdateRequestDto } from "@app/dto/AdditionTypeUpdateRequestDto";
-import { AdditionTypeIdRequestDto } from "@app/dto/AdditionTypeIdRequestDto";
+import { AdditionTypeCreateRequestDto } from "@app/dto/request/AdditionTypeCreateRequestDto";
+import { AdditionTypeUpdateRequestDto } from "@app/dto/request/AdditionTypeUpdateRequestDto";
+import { IdParamRequestDto } from "@app/dto/request/IdParamRequestDto";
 
 export class AdditionTypeController {
   public constructor(
@@ -25,7 +25,7 @@ export class AdditionTypeController {
   }
 
   public async getAdditionTypeById(req: Request, res: Response) {
-    const { params } = await validate(AdditionTypeIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     const additionType = await this.additionTypeService.getAdditionTypeById(
       params.id
     );
@@ -42,7 +42,7 @@ export class AdditionTypeController {
   }
 
   public async deleteAdditionTypeById(req: Request, res: Response) {
-    const { params } = await validate(AdditionTypeIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     await this.additionTypeService.deleteAdditionTypeById(params.id);
     ResponseEntity.noContent(res);
   }

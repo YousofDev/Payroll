@@ -1,4 +1,6 @@
-import { EmployeeResponseDto } from "@app/dto/EmployeeResponseDto";
+import { EmployeeCreateType } from "@app/dto/request/EmployeeCreateRequestDto";
+import { EmployeeResponseDto } from "@app/dto/response/EmployeeResponseDto";
+import { EmployeeUpdateType } from "@app/dto/request/EmployeeUpdateRequestDto";
 import { NewEmployeeModel, EmployeeModel } from "@app/model/Employee";
 import { EmployeeRepository } from "@app/repository/EmployeeRepository";
 import { NotFoundException } from "@exception/NotFoundException";
@@ -12,7 +14,7 @@ export class EmployeeService {
     return employees.map((emp) => new EmployeeResponseDto(emp));
   }
 
-  public async createEmployee(employeeDto: NewEmployeeModel) {
+  public async createEmployee(employeeDto: EmployeeCreateType) {
     const employee = await this.employeeRepository.createEmployee(employeeDto);
     return new EmployeeResponseDto(employee);
   }
@@ -24,7 +26,7 @@ export class EmployeeService {
   }
 
   public async updateEmployee(
-    employeeDto: NewEmployeeModel,
+    employeeDto: EmployeeUpdateType,
     employeeId: number
   ) {
     let employee =

@@ -1,4 +1,5 @@
 import { PayslipItemModel, PayslipModel } from "@app/model/Payslip";
+import { Direction, HoursMetadata } from "@data/pgTypes";
 
 export class PayslipItemResponseDto {
   id: number;
@@ -6,6 +7,8 @@ export class PayslipItemResponseDto {
   amount: string;
   name: string;
   description: string | null;
+  metadata: HoursMetadata | null;
+  direction: "ADDITION" | "DEDUCTION";
 
   constructor(item: PayslipItemModel) {
     this.id = item.id;
@@ -13,6 +16,8 @@ export class PayslipItemResponseDto {
     this.amount = item.amount;
     this.name = item.name;
     this.description = item.description;
+    this.metadata = item.metadata;
+    this.direction = item.direction;
   }
 }
 

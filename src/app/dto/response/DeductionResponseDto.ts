@@ -1,15 +1,6 @@
 import { DeductionModel } from "@app/model/Deduction";
-
-interface DeductionDetails {
-  id: number;
-  employeeId: number;
-  deductionTypeId: number;
-  amount: string;
-  name: string;
-  description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { DeductionTypeModel } from "@app/model/DeductionType";
+import { HoursMetadata } from "@data/pgTypes";
 
 export class DeductionResponseDto {
   id: number;
@@ -17,17 +8,21 @@ export class DeductionResponseDto {
   deductionTypeId: number;
   amount: string;
   name: string;
-  description: string | null;
+  frequency: string | undefined;
+  description: string | null | undefined;
+  metadata: HoursMetadata | null;
   createdAt: Date;
   updatedAt: Date;
 
-  constructor(deduction: DeductionDetails) {
+  constructor(deduction: DeductionModel, deductionType: DeductionTypeModel) {
     this.id = deduction.id;
     this.employeeId = deduction.employeeId;
     this.deductionTypeId = deduction.deductionTypeId;
     this.amount = deduction.amount;
-    this.name = deduction.name;
-    this.description = deduction.description;
+    this.name = deductionType?.name;
+    this.frequency = deductionType?.frequencyType;
+    this.description = deductionType?.description;
+    this.metadata = deduction.metadata;
     this.createdAt = deduction.createdAt;
     this.updatedAt = deduction.updatedAt;
   }

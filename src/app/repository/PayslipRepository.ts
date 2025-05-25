@@ -2,15 +2,16 @@ import { eq, and, between, inArray, sql } from "drizzle-orm";
 import {
   PayslipItemResponseDto,
   PayslipResponseDto,
-} from "@app/dto/PayslipResponseDto";
-import { PayslipCreateRequestDtoType } from "@app/dto/PayslipCreateRequestDto";
+} from "@app/dto/response/PayslipResponseDto";
+import { PayslipCreateRequestDtoType } from "@app/dto/request/PayslipCreateRequestDto";
 import { Payslip, PayslipItem, PayslipItemModel } from "@app/model/Payslip";
 import { DatabaseClient } from "@data/DatabaseClient";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
+import { DirectionType } from "@config/constants";
 
-import { PreparedPayslipType } from "@app/dto/PreparedPayslipType";
-import { Direction } from "@data/pgEnums";
+import { PreparedPayslipType } from "@app/dto/internal/PreparedPayslipType";
+import { Direction } from "@data/pgTypes";
 import { DatabaseException } from "@exception/DatabaseException";
 import { BadRequestException } from "@exception/BadRequestException";
 
@@ -22,9 +23,7 @@ export class PayslipRepository {
   /**
    * Creates a new payslip with its items in a transaction
    */
-  public async createPayslip(
-    payslip: PreparedPayslipType
-  ): Promise<PayslipResponseDto> {
+  public async createPayslip(payslip: PreparedPayslipType) {
     try {
       return await this.db.transaction(async (trx) => {
         // Insert the payslip record
@@ -53,7 +52,7 @@ export class PayslipRepository {
           (item) => item.direction === Direction.enumValues[1]
         );
 
-        return new PayslipResponseDto(newPayslip, additions, deductions);
+        return { newPayslip, additions, deductions };
       });
     } catch (error) {
       logger.error("Error creating payslip:", error);
@@ -66,8 +65,10 @@ export class PayslipRepository {
    */
   private preparePayslipItems(payslip: PreparedPayslipType, payslipId: number) {
     const additionItems = (payslip.additions || []).map((item) => ({
-      name: item.name,
       amount: item.amount,
+      name: item.name,
+      metadata: item.metadata,
+      description: item.description,
       employeeId: item.employeeId,
       additionTypeId: item.additionTypeId,
       createdAt: item.createdAt,
@@ -76,8 +77,10 @@ export class PayslipRepository {
     }));
 
     const deductionItems = (payslip.deductions || []).map((item) => ({
-      name: item.name,
       amount: item.amount,
+      name: item.name,
+      metadata: item.metadata,
+      description: item.description,
       employeeId: item.employeeId,
       deductionTypeId: item.deductionTypeId,
       createdAt: item.createdAt,
@@ -122,56 +125,101 @@ export class PayslipRepository {
   }
 
   public async getAllPayslips() {
-    const payslips = await this.db.select().from(Payslip).execute();
+    // Fetch all payslips with their related items
+    const payslipsWithItems = await this.db
+      .select({
+        payslip: Payslip,
+        item: PayslipItem,
+      })
+      .from(Payslip)
+      .leftJoin(PayslipItem, eq(Payslip.id, PayslipItem.payslipId));
 
-    const payslipItems = await this.db
-      .select()
-      .from(PayslipItem)
-      .where(sql`${PayslipItem.payslipId} IN ${payslips.map((p) => p.id)}`)
-      .execute();
+    // Group items by payslip and transform to response DTO
+    const payslipMap = new Map<
+      number,
+      {
+        payslip: typeof Payslip.$inferSelect;
+        items: (typeof PayslipItem.$inferSelect)[];
+      }
+    >();
 
-    const payslipItemsMap = payslipItems.reduce(
-      (map, item) => {
-        if (!map[item.payslipId]) {
-          map[item.payslipId] = [];
-        }
-        map[item.payslipId].push(new PayslipItemResponseDto(item));
-        return map;
-      },
-      {} as Record<number, PayslipItemResponseDto[]>
+    // Aggregate payslips and their items
+    for (const { payslip, item } of payslipsWithItems) {
+      if (!payslipMap.has(payslip.id)) {
+        payslipMap.set(payslip.id, {
+          payslip,
+          items: [],
+        });
+      }
+      if (item) {
+        payslipMap.get(payslip.id)!.items.push(item);
+      }
+    }
+
+    // Transform to response DTOs
+    const result: PayslipResponseDto[] = Array.from(payslipMap.values()).map(
+      ({ payslip, items }) => {
+        // Separate additions and deductions
+        const additions = items
+          .filter((item) => item.direction === "ADDITION")
+          .map((item) => new PayslipItemResponseDto(item));
+
+        const deductions = items
+          .filter((item) => item.direction === "DEDUCTION")
+          .map((item) => new PayslipItemResponseDto(item));
+
+        return new PayslipResponseDto(payslip, additions, deductions);
+      }
     );
 
-    return payslips.map((payslip) => new PayslipResponseDto(payslip, [], []));
-
-    // return new PayslipResponseDto(payslips, [], [])
-
-    // return payslips.map(
-    //   (payslip) =>
-    //     new PayslipResponseDto(payslip, payslipItemsMap[payslip.id] || [])
-    // );
+    return result;
   }
 
   public async getPayslipById(payslipId: number) {
-    const payslip = await this.getPayslipOrThrowException(payslipId);
+    // Fetch payslip with its related items
+    const payslipsWithItems = await this.db
+      .select({
+        payslip: Payslip,
+        item: PayslipItem,
+      })
+      .from(Payslip)
+      .leftJoin(PayslipItem, eq(Payslip.id, PayslipItem.payslipId))
+      .where(eq(Payslip.id, payslipId));
 
-    const payslipItems = await this.db
-      .select()
-      .from(PayslipItem)
-      .where(eq(PayslipItem.payslipId, payslipId));
+    // If no payslip found, return null
+    if (payslipsWithItems.length === 0) {
+      return null;
+    }
 
-    const additions = payslipItems.filter(
-      (item) => item.direction == Direction.enumValues[0]
-    );
+    // Group items for the payslip
+    const payslip = payslipsWithItems[0].payslip;
+    const items = payslipsWithItems
+      .filter((row) => row.item !== null)
+      .map((row) => row.item!);
 
-    const deductions = payslipItems.filter(
-      (item) => item.direction == Direction.enumValues[1]
-    );
+    // Separate additions and deductions
+    const additions = items
+      .filter((item) => item.direction === "ADDITION")
+      .map((item) => new PayslipItemResponseDto(item));
 
-    return new PayslipResponseDto(payslip, additions, deductions);
+    const deductions = items
+      .filter((item) => item.direction === "DEDUCTION")
+      .map((item) => new PayslipItemResponseDto(item));
+
+    return { payslip, additions, deductions };
   }
 
   public async deletePayslipById(payslipId: number): Promise<void> {
-    await this.db.delete(Payslip).where(eq(Payslip.id, payslipId));
+    const result = await this.db
+      .delete(Payslip)
+      .where(eq(Payslip.id, payslipId))
+      .returning();
+
+    if (result.length == 0) {
+      throw new NotFoundException(
+        `Payslip ID with ${payslipId} does not exists`
+      );
+    }
   }
 
   public async getPayslipOrThrowException(payslipId: number) {

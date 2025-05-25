@@ -1,7 +1,4 @@
-import {
-  UserAssignRoleRequestDto,
-  UserAssignRoleRequestDtoType,
-} from "./../dto/UserAssignRoleRequestDto";
+import { UserAssignRoleType } from "@app/dto/request/UserAssignRoleRequestDto";
 import { NewUserModel, User, UserModel } from "@app/model/User";
 import { UserRole } from "@config/constants";
 import { DatabaseClient } from "@data/DatabaseClient";
@@ -42,7 +39,7 @@ export class UserRepository {
   }
 
   public async assignUserRole(
-    roleDto: UserAssignRoleRequestDtoType,
+    roleDto: UserAssignRoleType,
     id: number
   ) {
     await this.db

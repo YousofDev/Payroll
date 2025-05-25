@@ -1,4 +1,4 @@
-import { AdditionTypeResponseDto } from "@app/dto/AdditionTypeResponseDto";
+import { AdditionTypeResponseDto } from "@app/dto/response/AdditionTypeResponseDto";
 import { NewAdditionTypeModel } from "@app/model/AdditionType";
 import { AdditionTypeRepository } from "@app/repository/AdditionTypeRepository";
 import { NotFoundException } from "@exception/NotFoundException";

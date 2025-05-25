@@ -9,21 +9,30 @@ export const EmployeeCreateRequestDto = z.object({
     position: z.string().optional(),
     department: z.string().optional(),
     location: z.string().optional(),
-    salary: z
+    basicSalary: z
       .number()
       .positive()
       .transform((val) => val.toString()),
+    hourRate: z
+      .number()
+      .positive()
+      .transform((val) => val.toString())
+      .optional(),
     hireDate: z
       .string()
       .refine((dateString) => !isNaN(Date.parse(dateString)), {
         message: "Invalid date format for hireDate",
-      }).optional(),
+      })
+      .optional(),
     terminationDate: z
       .string()
       .refine((dateString) => !isNaN(Date.parse(dateString)), {
         message: "Invalid date format for terminationDate",
-      }).optional(),
+      })
+      .optional(),
   }),
 });
 
-// export type EmployeeRequestDtoType = z.infer<typeof EmployeeRequestDto>["body"];
+export type EmployeeCreateType = z.infer<
+  typeof EmployeeCreateRequestDto
+>["body"];

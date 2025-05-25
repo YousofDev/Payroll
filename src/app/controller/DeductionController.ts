@@ -3,9 +3,9 @@ import { logger } from "@util/logger";
 import { validate } from "@util/validate";
 import { ResponseEntity } from "@util/ResponseEntity";
 import { DeductionService } from "@app/service/DeductionService";
-import { DeductionCreateRequestDto } from "@app/dto/DeductionCreateRequestDto";
-import { DeductionUpdateRequestDto } from "@app/dto/DeductionUpdateRequestDto";
-import { DeductionIdRequestDto } from "@app/dto/DeductionIdRequestDto";
+import { DeductionCreateRequestDto } from "@app/dto/request/DeductionCreateRequestDto";
+import { DeductionUpdateRequestDto } from "@app/dto/request/DeductionUpdateRequestDto";
+import { IdParamRequestDto } from "@app/dto/request/IdParamRequestDto";
 
 export class DeductionController {
   public constructor(private readonly deductionService: DeductionService) {}
@@ -22,7 +22,7 @@ export class DeductionController {
   }
 
   public async getDeductionById(req: Request, res: Response) {
-    const { params } = await validate(DeductionIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     const deduction = await this.deductionService.getDeductionById(params.id);
     ResponseEntity.ok(res, deduction);
   }
@@ -37,7 +37,7 @@ export class DeductionController {
   }
 
   public async deleteDeductionById(req: Request, res: Response) {
-    const { params } = await validate(DeductionIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     await this.deductionService.deleteDeductionById(params.id);
     ResponseEntity.noContent(res);
   }

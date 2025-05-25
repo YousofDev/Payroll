@@ -7,9 +7,10 @@ import {
   timestamp,
   varchar,
   date,
+  jsonb,
 } from "drizzle-orm/pg-core";
-import { Employee } from "./Employee";
-import { Direction, PayslipStatus } from "@data/pgEnums";
+import { Employee } from "@app/model/Employee";
+import { Direction, HoursMetadata, PayslipStatus } from "@data/pgTypes";
 
 export const Payslip = pgTable("payslips", {
   id: serial("id").primaryKey(),
@@ -40,9 +41,10 @@ export const PayslipItem = pgTable("payslip_items", {
       onDelete: "cascade",
     })
     .notNull(),
-  name: varchar("name", { length: 100 }).notNull(),
+  name: varchar("name", { length: 100 }).notNull(), // The name of additionType or DeductionType
+  metadata: jsonb("metadata").$type<HoursMetadata>().default({}),
   description: varchar("description"),
-  direction: Direction("direction").notNull(),
+  direction: Direction("direction").notNull(), // Enum: ADDITION / DEDUCTION
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 });
 

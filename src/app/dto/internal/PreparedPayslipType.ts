@@ -1,16 +1,22 @@
+import { HoursMetadata } from "@data/pgTypes";
+
 export interface PreparedAddition {
   name: string;
   amount: string;
+  description: string | null;
+  metadata: HoursMetadata | null;
   employeeId: number;
-  additionTypeId: number
+  additionTypeId: number;
   createdAt: Date;
 }
 
 export interface PreparedDeduction {
   name: string;
   amount: string;
+  description: string | null;
+  metadata: HoursMetadata | null;
   employeeId: number;
-  deductionTypeId: number
+  deductionTypeId: number;
   createdAt: Date;
 }
 

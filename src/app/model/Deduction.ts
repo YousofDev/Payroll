@@ -3,12 +3,14 @@ import {
   boolean,
   decimal,
   integer,
+  jsonb,
   pgTable,
   serial,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { Employee } from "./Employee";
-import { DeductionType } from "./DeductionType";
+import { Employee } from "@app/model/Employee";
+import { DeductionType } from "@app/model/DeductionType";
+import { HoursMetadata } from "@data/pgTypes";
 
 export const Deduction = pgTable("deductions", {
   id: serial("id").primaryKey(),
@@ -21,6 +23,7 @@ export const Deduction = pgTable("deductions", {
     })
     .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  metadata: jsonb("metadata").$type<HoursMetadata>().default({}),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { logger } from "@util/logger";
 import { PayslipService } from "@app/service/PayslipService";
 import { validate } from "@util/validate";
-import { PayslipCreateRequestDto } from "@app/dto/PayslipCreateRequestDto";
+import { PayslipCreateRequestDto } from "@app/dto/request/PayslipCreateRequestDto";
 import { ResponseEntity } from "@util/ResponseEntity";
-import { PayslipIdRequestDto } from "@app/dto/PayslipIdRequestDto";
+import { IdParamRequestDto } from "@app/dto/request/IdParamRequestDto";
 
 export class PayslipController {
   public constructor(private readonly payslipService: PayslipService) {}
@@ -21,13 +21,13 @@ export class PayslipController {
   }
 
   public async getPayslipById(req: Request, res: Response) {
-    const { params } = await validate(PayslipIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     const payslip = await this.payslipService.getPayslipById(params.id);
     ResponseEntity.ok(res, payslip);
   }
 
   public async deletePayslipById(req: Request, res: Response) {
-    const { params } = await validate(PayslipIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     await this.payslipService.deletePayslipById(params.id);
     ResponseEntity.noContent(res);
   }

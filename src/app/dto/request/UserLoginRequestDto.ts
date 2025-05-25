@@ -6,3 +6,5 @@ export const UserLoginRequestDto = z.object({
     password: z.string().min(6),
   }),
 });
+
+export type UserLoginType = z.infer<typeof UserLoginRequestDto>["body"];

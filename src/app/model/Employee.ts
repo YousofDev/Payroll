@@ -17,11 +17,16 @@ export const Employee = pgTable("employees", {
   position: varchar("position", { length: 50 }),
   department: varchar("department", { length: 50 }),
   location: varchar("location", { length: 50 }),
-  salary: decimal("salary", { precision: 10, scale: 2 }).notNull(),
+  basicSalary: decimal("basic_salary", { precision: 10, scale: 2 }).notNull(),
+  hourRate: decimal("hour_rate", { precision: 10, scale: 2 }), // can be auto calculated(basicSalary / 30)
   hireDate: date("hire_date"),
   terminationDate: date("termination_date"),
-  createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type NewEmployeeModel = InferInsertModel<typeof Employee>;

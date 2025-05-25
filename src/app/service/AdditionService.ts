@@ -1,12 +1,14 @@
-import { AdditionResponseDto } from "@app/dto/AdditionResponseDto";
+import { AdditionResponseDto } from "@app/dto/response/AdditionResponseDto";
 import { NewAdditionModel } from "@app/model/Addition";
 import { AdditionTypeRepository } from "@app/repository/AdditionTypeRepository";
 import { EmployeeRepository } from "@app/repository/EmployeeRepository";
 import { AdditionRepository } from "@app/repository/AdditionRepository";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { FrequencyType } from "@data/pgEnums";
+import { FrequencyType, HoursMetadata } from "@data/pgTypes";
 import { BadRequestException } from "@exception/BadRequestException";
+import { AdditionCreateType } from "@app/dto/request/AdditionCreateRequestDto";
+import { AdditionUpdateType } from "@app/dto/request/AdditionUpdateRequestDto";
 
 export class AdditionService {
   public constructor(
@@ -16,7 +18,7 @@ export class AdditionService {
   ) {}
 
   public async createAddition(
-    additionDto: NewAdditionModel
+    additionDto: AdditionCreateType
   ): Promise<AdditionResponseDto> {
     // Ensure the employee exists
 
@@ -31,96 +33,104 @@ export class AdditionService {
       );
 
     // Ensure the addition with type MONTHLY can be added once per employee
-    const additionTypeExists =
-      await this.additionRepository.getAdditionByAdditionTypeId(
-        additionDto.additionTypeId,
-        additionDto.employeeId
-      );
+    const result = await this.additionRepository.getAdditionByAdditionTypeId(
+      additionDto.additionTypeId,
+      additionDto.employeeId
+    );
 
-    if (
-      additionTypeExists &&
-      additionTypeExists.frequencyType == FrequencyType.enumValues[0]
-    ) {
+    if (result && additionType.frequencyType == FrequencyType.enumValues[0]) {
       throw new BadRequestException(
         "This MONTHLY addition already added to this employee"
       );
     }
 
-    const newAddition =
-      await this.additionRepository.createAddition(additionDto);
+    // if hours Addition
+    let amount = "0";
+    let metadata: HoursMetadata = {};
+    if (additionDto.hours) {
+      amount = (
+        additionDto.hours *
+        additionDto.hourRate *
+        (additionDto.multipliers || 1)
+      ).toString();
+      metadata = {
+        hours: additionDto.hours,
+        hourRate: additionDto.hourRate,
+        multiplier: additionDto.multipliers || 1,
+      };
+    } else if (additionDto.amount) {
+      // Just amount
+      amount = additionDto.amount;
+    }
 
-    return new AdditionResponseDto({
-      ...newAddition,
-      name: additionType && additionType.name,
-      description: additionType && additionType.description,
-    });
+    const newAddition = {
+      employeeId: additionDto.employeeId,
+      additionTypeId: additionDto.additionTypeId,
+      amount: amount,
+      metadata,
+    };
+
+    const createdAddition =
+      await this.additionRepository.createAddition(newAddition);
+
+    return new AdditionResponseDto(createdAddition, additionType);
   }
 
   public async getAllAdditions(): Promise<AdditionResponseDto[]> {
-    const additions = await this.additionRepository.getAllAdditions();
-    return additions.map((add) => new AdditionResponseDto(add));
+    const result = await this.additionRepository.getAllAdditions();
+    return result.map(
+      ({ addition, additionType }) =>
+        new AdditionResponseDto(addition, additionType)
+    );
   }
 
   public async getAdditionById(
     additionId: number
   ): Promise<AdditionResponseDto> {
-    const addition =
+    const { addition, additionType } =
       await this.additionRepository.getAdditionOrThrowException(additionId);
-    return new AdditionResponseDto(addition);
+    return new AdditionResponseDto(addition, additionType);
   }
 
   public async updateAddition(
-    additionDto: NewAdditionModel,
+    additionDto: AdditionUpdateType,
     additionId: number
   ): Promise<AdditionResponseDto> {
     // Ensure the addition exists
-    await this.additionRepository.getAdditionOrThrowException(additionId);
+    const { additionType } =
+      await this.additionRepository.getAdditionOrThrowException(additionId);
 
-    // Ensure the employee exists
-    await this.employeeRepository.getEmployeeOrThrowException(
-      additionDto.employeeId
-    );
-
-    // Ensure the addition type exists
-    const additionType =
-      await this.additionTypeRepository.getAdditionTypeOrThrowException(
-        additionDto.additionTypeId
-      );
-
-    // Ensure the addition with type MONTHLY can be added once per employee
-    const additionTypeExists =
-      await this.additionRepository.getAdditionByAdditionTypeId(
-        additionDto.additionTypeId,
-        additionDto.employeeId
-      );
-
-    if (
-      additionTypeExists &&
-      additionType.frequencyType == FrequencyType.enumValues[0]
-    ) {
-      throw new BadRequestException(
-        "This MONTHLY addition already added to this employee"
-      );
+    // if hours Addition
+    let amount = "0";
+    let metadata: HoursMetadata = {};
+    if (additionDto.hours && additionDto.hourRate) {
+      amount = (
+        additionDto.hours *
+        additionDto.hourRate *
+        (additionDto.multipliers || 1)
+      ).toString();
+      metadata = {
+        hours: additionDto.hours,
+        hourRate: additionDto.hourRate,
+        multiplier: additionDto.multipliers || 1,
+      };
+    } else if (additionDto.amount) {
+      // Just amount
+      amount = additionDto.amount;
     }
 
-    await this.additionTypeRepository.getAdditionTypeOrThrowException(
-      additionDto.additionTypeId
-    );
-
     const updatedAddition = await this.additionRepository.updateAddition(
-      additionDto,
+      {
+        amount,
+        metadata,
+      },
       additionId
     );
 
-    return new AdditionResponseDto({
-      ...updatedAddition,
-      name: additionType && additionType.name,
-      description: additionType && additionType.description,
-    });
+    return new AdditionResponseDto(updatedAddition, additionType);
   }
 
   public async deleteAdditionById(additionId: number) {
-    await this.additionRepository.getAdditionOrThrowException(additionId);
     await this.additionRepository.deleteAdditionById(additionId);
   }
 }

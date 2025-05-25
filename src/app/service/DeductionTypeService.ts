@@ -1,4 +1,4 @@
-import { DeductionTypeResponseDto } from "@app/dto/DeductionTypeResponseDto";
+import { DeductionTypeResponseDto } from "@app/dto/response/DeductionTypeResponseDto";
 import { NewDeductionTypeModel } from "@app/model/DeductionType";
 import { DeductionTypeRepository } from "@app/repository/DeductionTypeRepository";
 import { NotFoundException } from "@exception/NotFoundException";

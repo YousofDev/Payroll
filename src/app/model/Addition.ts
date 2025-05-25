@@ -2,12 +2,14 @@ import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   decimal,
   integer,
+  jsonb,
   pgTable,
   serial,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { Employee } from "./Employee";
-import { AdditionType } from "./AdditionType";
+import { Employee } from "@app/model/Employee";
+import { AdditionType } from "@app/model/AdditionType";
+import { HoursMetadata } from "@data/pgTypes";
 
 export const Addition = pgTable("additions", {
   id: serial("id").primaryKey(),
@@ -20,6 +22,7 @@ export const Addition = pgTable("additions", {
     })
     .notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  metadata: jsonb("metadata").$type<HoursMetadata>().default({}),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -3,10 +3,11 @@ import { PayslipRepository } from "@app/repository/PayslipRepository";
 import { logger } from "@util/logger";
 import { AdditionRepository } from "@app/repository/AdditionRepository";
 import { DeductionRepository } from "@app/repository/DeductionRepository";
-import { PayslipCreateRequestDtoType } from "@app/dto/PayslipCreateRequestDto";
-import { PreparedPayslipType } from "@app/dto/PreparedPayslipType";
-import { PayslipResponseDto } from "@app/dto/PayslipResponseDto";
+import { PayslipCreateRequestDtoType } from "@app/dto/request/PayslipCreateRequestDto";
+import { PreparedPayslipType } from "@app/dto/internal/PreparedPayslipType";
+import { PayslipResponseDto } from "@app/dto/response/PayslipResponseDto";
 import { BusinessException } from "@exception/BusinessException";
+import { NotFoundException } from "@exception/NotFoundException";
 
 interface PayslipGenerationResult {
   success: PayslipResponseDto[];
@@ -22,8 +23,7 @@ export class PayslipService {
     private readonly employeeRepository: EmployeeRepository,
     private readonly additionRepository: AdditionRepository,
     private readonly deductionRepository: DeductionRepository
-  ) {
-  }
+  ) {}
 
   public async generatePayslips(
     payslipDto: PayslipCreateRequestDtoType
@@ -99,7 +99,7 @@ export class PayslipService {
       )) || [];
 
     // 7- calculate basic salary, total additions, total deductions, net salary
-    const basicSalary = Number(employee.salary);
+    const basicSalary = Number(employee.basicSalary);
 
     const totalAdditions =
       this.calculateTotal(monthlyAdditions) +
@@ -129,7 +129,10 @@ export class PayslipService {
       deductions: [...monthlyDeductions, ...specialDeductions],
     };
 
-    return await this.payslipRepository.createPayslip(payslip);
+    const { newPayslip, additions, deductions } =
+      await this.payslipRepository.createPayslip(payslip);
+
+    return new PayslipResponseDto(newPayslip, additions, deductions);
   }
 
   private calculateTotal(items: any[]): number {
@@ -137,15 +140,23 @@ export class PayslipService {
   }
 
   public async getAllPayslips() {
-    return await this.payslipRepository.getAllPayslips();
+    const result = await this.payslipRepository.getAllPayslips();
+    return result;
   }
 
   public async getPayslipById(payslipId: number) {
-    return await this.payslipRepository.getPayslipById(payslipId);
+    const result = await this.payslipRepository.getPayslipById(payslipId);
+    if (!result) {
+      throw new NotFoundException(
+        `Payslip with ID ${payslipId} does not exist`
+      );
+    }
+
+    const { payslip, additions, deductions } = result;
+    return new PayslipResponseDto(payslip, additions, deductions);
   }
 
   public async deletePayslipById(payslipId: number): Promise<void> {
-    await this.payslipRepository.getPayslipOrThrowException(payslipId);
     await this.payslipRepository.deletePayslipById(payslipId);
   }
 }

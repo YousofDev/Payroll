@@ -8,7 +8,8 @@ export class EmployeeResponseDto {
   position: string | null;
   department: string | null;
   location: string | null;
-  salary: string;
+  basicSalary: number;
+  hourRate: number;
   hireDate: string | null;
   terminationDate: string | null;
   createdAt: Date | null;
@@ -22,7 +23,8 @@ export class EmployeeResponseDto {
     this.position = employee.position;
     this.department = employee.department;
     this.location = employee.location;
-    this.salary = employee.salary;
+    this.basicSalary = Number(employee.basicSalary);
+    this.hourRate = Number(employee.hourRate);
     this.hireDate = employee.hireDate;
     this.terminationDate = employee.terminationDate;
     this.createdAt = employee.createdAt;

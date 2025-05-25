@@ -1,7 +1,6 @@
 import { Addition, AdditionModel, NewAdditionModel } from "@app/model/Addition";
 import { AdditionType } from "@app/model/AdditionType";
 import { DatabaseClient } from "@data/DatabaseClient";
-import { Direction, FrequencyType } from "@data/pgEnums";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 import { and, eq, sql, gte, lte, between } from "drizzle-orm";
@@ -18,7 +17,7 @@ export class AdditionRepository {
   public constructor() {}
 
   public async createAddition(
-    additionDto: AdditionDto
+    additionDto: NewAdditionModel
   ): Promise<AdditionModel> {
     const addition = await this.db
       .insert(Addition)
@@ -32,15 +31,8 @@ export class AdditionRepository {
   public async getAllAdditions() {
     return await this.db
       .select({
-        id: Addition.id,
-        employeeId: Addition.employeeId,
-        additionTypeId: Addition.additionTypeId,
-        frequencyType: AdditionType.frequencyType,
-        amount: Addition.amount,
-        name: AdditionType.name,
-        description: AdditionType.description,
-        createdAt: Addition.createdAt,
-        updatedAt: Addition.updatedAt,
+        addition: Addition,
+        additionType: AdditionType,
       })
       .from(Addition)
       .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id));
@@ -49,15 +41,8 @@ export class AdditionRepository {
   public async getAllAdditionsByEmployeeId(employeeId: number) {
     return await this.db
       .select({
-        id: Addition.id,
-        employeeId: Addition.employeeId,
-        additionTypeId: Addition.additionTypeId,
-        frequencyType: AdditionType.frequencyType,
-        amount: Addition.amount,
-        name: AdditionType.name,
-        description: AdditionType.description,
-        createdAt: Addition.createdAt,
-        updatedAt: Addition.updatedAt,
+        addition: Addition,
+        additionType: AdditionType,
       })
       .from(Addition)
       .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
@@ -67,15 +52,8 @@ export class AdditionRepository {
   public async getAdditionById(additionId: number) {
     return await this.db
       .select({
-        id: Addition.id,
-        employeeId: Addition.employeeId,
-        additionTypeId: Addition.additionTypeId,
-        frequencyType: AdditionType.frequencyType,
-        amount: Addition.amount,
-        name: AdditionType.name,
-        description: AdditionType.description,
-        createdAt: Addition.createdAt,
-        updatedAt: Addition.updatedAt,
+        addition: Addition,
+        additionType: AdditionType,
       })
       .from(Addition)
       .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
@@ -89,9 +67,8 @@ export class AdditionRepository {
   ) {
     return await this.db
       .select({
-        frequencyType: AdditionType.frequencyType,
-        name: AdditionType.name,
-        description: AdditionType.description,
+        addition: Addition,
+        additionType: AdditionType,
       })
       .from(Addition)
       .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
@@ -107,20 +84,21 @@ export class AdditionRepository {
   public async getMonthlyAdditionsByEmployeeId(employeeId: number) {
     return await this.db
       .select({
-        name: AdditionType.name,
-        amount: Addition.amount,
         employeeId: Addition.employeeId,
         additionTypeId: Addition.additionTypeId,
         frequencyType: AdditionType.frequencyType,
+        amount: Addition.amount,
+        name: AdditionType.name,
+        description: AdditionType.description,
+        metadata: Addition.metadata,
         createdAt: Addition.createdAt,
-        // direction: sql`${Direction.enumValues[0]}`,
       })
       .from(Addition)
       .innerJoin(AdditionType, eq(Addition.additionTypeId, AdditionType.id))
       .where(
         and(
           eq(Addition.employeeId, employeeId),
-          eq(AdditionType.frequencyType, FrequencyType.enumValues[0])
+          eq(AdditionType.frequencyType, "MONTHLY")
         )
       );
   }
@@ -132,11 +110,13 @@ export class AdditionRepository {
   ) {
     return await this.db
       .select({
-        name: AdditionType.name,
-        amount: Addition.amount,
         employeeId: Addition.employeeId,
         additionTypeId: Addition.additionTypeId,
         frequencyType: AdditionType.frequencyType,
+        amount: Addition.amount,
+        name: AdditionType.name,
+        description: AdditionType.description,
+        metadata: Addition.metadata,
         createdAt: Addition.createdAt,
       })
       .from(Addition)
@@ -144,7 +124,7 @@ export class AdditionRepository {
       .where(
         and(
           eq(Addition.employeeId, employeeId),
-          eq(AdditionType.frequencyType, FrequencyType.enumValues[1]),
+          eq(AdditionType.frequencyType, "SPECIAL"),
           between(
             Addition.createdAt,
             new Date(payPeriodStart),
@@ -155,7 +135,7 @@ export class AdditionRepository {
   }
 
   public async updateAddition(
-    additionDto: NewAdditionModel,
+    additionDto: Partial<AdditionModel>,
     additionId: number
   ): Promise<AdditionModel> {
     const addition = await this.db
@@ -169,17 +149,26 @@ export class AdditionRepository {
   }
 
   public async deleteAdditionById(additionId: number): Promise<void> {
-    await this.db.delete(Addition).where(eq(Addition.id, additionId));
-  }
-
-  public async getAdditionOrThrowException(additionId: number) {
-    const addition = await this.getAdditionById(additionId);
-
-    if (!addition) {
+    const result = await this.db
+      .delete(Addition)
+      .where(eq(Addition.id, additionId))
+      .returning();
+    if (result.length == 0) {
       throw new NotFoundException(
         `addition ID with ${additionId} does not exists`
       );
     }
-    return addition;
+  }
+
+  public async getAdditionOrThrowException(additionId: number) {
+    const result = await this.getAdditionById(additionId);
+
+    if (!result) {
+      throw new NotFoundException(
+        `addition ID with ${additionId} does not exists`
+      );
+    }
+
+    return result;
   }
 }

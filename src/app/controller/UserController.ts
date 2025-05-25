@@ -2,13 +2,25 @@ import { Request, Response } from "express";
 import { validate } from "@util/validate";
 import { ResponseEntity } from "@util/ResponseEntity";
 import { UserService } from "@app/service/UserService";
-import { UserRegisterRequestDto } from "@app/dto/UserRegisterRequestDto";
-import { UserLoginRequestDto } from "@app/dto/UserLoginRequestDto";
-import { UserIdRequestDto } from "@app/dto/UserIdRequestDto";
-import { UserAssignRoleRequestDto } from "@app/dto/UserAssignRoleRequestDto";
+import { UserRegisterRequestDto } from "@app/dto/request/UserRegisterRequestDto";
+import { UserLoginRequestDto } from "@app/dto/request/UserLoginRequestDto";
+import { UserAssignRoleRequestDto } from "@app/dto/request/UserAssignRoleRequestDto";
+import { IdParamRequestDto } from "@app/dto/request/IdParamRequestDto";
 
 export class UserController {
   public constructor(private readonly userService: UserService) {}
+
+  public async register(req: Request, res: Response) {
+    const { body } = await validate(UserRegisterRequestDto, req);
+    const result = await this.userService.register(body);
+    ResponseEntity.created(res, result);
+  }
+
+  public async login(req: Request, res: Response) {
+    const { body } = await validate(UserLoginRequestDto, req);
+    const loginResponse = await this.userService.login(body);
+    ResponseEntity.ok(res, loginResponse);
+  }
 
   public async getAllUsers(req: Request, res: Response) {
     const users = await this.userService.getAllUsers();
@@ -16,35 +28,26 @@ export class UserController {
   }
 
   public async getUserById(req: Request, res: Response) {
-    const { params } = await validate(UserIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     const user = await this.userService.getUserById(params.id);
     ResponseEntity.ok(res, user);
   }
 
-  public async register(req: Request, res: Response) {
-    const { body } = await validate(UserRegisterRequestDto, req);
-    await this.userService.register(body);
-    ResponseEntity.created(res, { message: "User registered successfully" });
-  }
-
-  public async login(req: Request, res: Response) {
-    const { body } = await validate(UserLoginRequestDto, req);
-    const loginResponse = await this.userService.login(
-      body.email,
-      body.password
-    );
-    ResponseEntity.ok(res, loginResponse);
+   public async getUserByEmail(req: Request, res: Response) {
+    const { params } = await validate(IdParamRequestDto, req);
+    const user = await this.userService.getUserById(params.id);
+    ResponseEntity.ok(res, user);
   }
 
   public async deleteUserById(req: Request, res: Response) {
-    const { params } = await validate(UserIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     await this.userService.deleteUserById(params.id);
     ResponseEntity.noContent(res);
   }
 
   public async assignRole(req: Request, res: Response) {
     const { body, params } = await validate(UserAssignRoleRequestDto, req);
-    await this.userService.assignUserRole(body, params.id);
-    ResponseEntity.ok(res, { message: "Role assigned successfully" });
+    const result = await this.userService.assignUserRole(body, params.id);
+    ResponseEntity.ok(res, result);
   }
 }

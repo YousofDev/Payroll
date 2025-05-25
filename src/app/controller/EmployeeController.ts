@@ -3,9 +3,9 @@ import { EmployeeService } from "@app/service/EmployeeService";
 import { logger } from "@util/logger";
 import { validate } from "@util/validate";
 import { ResponseEntity } from "@util/ResponseEntity";
-import { EmployeeCreateRequestDto } from "@app/dto/EmployeeCreateRequestDto";
-import { EmployeeUpdateRequestDto } from "@app/dto/EmployeeUpdateRequestDto";
-import { EmployeeIdRequestDto } from "@app/dto/EmployeeIdRequestDto";
+import { EmployeeCreateRequestDto } from "@app/dto/request/EmployeeCreateRequestDto";
+import { EmployeeUpdateRequestDto } from "@app/dto/request/EmployeeUpdateRequestDto";
+import { IdParamRequestDto } from "@app/dto/request/IdParamRequestDto";
 
 export class EmployeeController {
   public constructor(private readonly employeeService: EmployeeService) {}
@@ -22,7 +22,7 @@ export class EmployeeController {
   }
 
   public async getEmployeeById(req: Request, res: Response) {
-    const { params } = await validate(EmployeeIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     const employee = await this.employeeService.getEmployeeById(params.id);
     ResponseEntity.ok(res, employee);
   }
@@ -37,7 +37,7 @@ export class EmployeeController {
   }
 
   public async deleteEmployeeById(req: Request, res: Response) {
-    const { params } = await validate(EmployeeIdRequestDto, req);
+    const { params } = await validate(IdParamRequestDto, req);
     await this.employeeService.deleteEmployeeById(params.id);
     ResponseEntity.noContent(res);
   }

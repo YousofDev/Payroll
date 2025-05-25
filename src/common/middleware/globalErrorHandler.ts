@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
-import { ZodError } from "zod";
+import { ZodError, ZodIssue } from "zod"; // Import ZodIssue
 import { BusinessException } from "@exception/BusinessException";
 import { logger } from "@util/logger";
 
@@ -8,6 +8,27 @@ interface ErrorResponse {
   message: string;
   details?: string[];
 }
+
+// Helper function to recursively extract ZodError details
+const extractZodErrorDetails = (issues: ZodIssue[]): string[] => {
+  const details: string[] = [];
+
+  issues.forEach((issue) => {
+    if ("unionErrors" in issue && Array.isArray(issue.unionErrors)) {
+      // If it's a union error, recursively extract details from each union error
+      issue.unionErrors.forEach((unionError: ZodError) => {
+        details.push(...extractZodErrorDetails(unionError.errors));
+      });
+    } else {
+      const fieldName =
+        issue.path.length > 0
+          ? issue.path[issue.path.length - 1]
+          : "unknown field";
+      details.push(`${fieldName}: ${issue.message}`);
+    }
+  });
+  return details;
+};
 
 export const globalErrorHandler = (
   err: ErrorRequestHandler,
@@ -26,15 +47,7 @@ export const globalErrorHandler = (
   } else if (err instanceof ZodError) {
     response.status = 400;
     response.message = "Validation Error";
-
-    const details = err.errors.map((issue) => {
-      const fieldName = issue.path[issue.path.length - 1];
-      return `${fieldName} ${issue.message}`;
-    });
-
-    if (details.length > 0) {
-      response.details = details;
-    }
+    response.details = extractZodErrorDetails(err.errors);
   }
 
   if (err instanceof Error && err.stack) {

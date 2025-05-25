@@ -12,6 +12,12 @@ export const PayslipStatus = pgEnum("payslip_status", [
   "PAID",
 ]);
 
+export type HoursMetadata = {
+  hours?: number;
+  hourRate?: number;
+  multiplier?: number;
+};
+
 /*
 
 --> SQL Statement must apply manually

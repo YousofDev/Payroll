@@ -7,7 +7,10 @@ export default defineConfig({
   dialect: "postgresql",
   breakpoints: false,
   dbCredentials: {
-    url: env.DATABASE_CONNECTION,
+    url:
+      env.NODE_ENV === "test"
+        ? env.TEST_DATABASE_CONNECTION
+        : env.DATABASE_CONNECTION,
   },
   verbose: true,
   strict: true,

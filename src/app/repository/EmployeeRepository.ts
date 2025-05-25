@@ -36,7 +36,7 @@ export class EmployeeRepository {
   }
 
   public async updateEmployee(
-    employeeDto: NewEmployeeModel,
+    employeeDto: Partial<EmployeeModel>,
     employeeId: number
   ): Promise<EmployeeModel> {
     const employee = await this.db

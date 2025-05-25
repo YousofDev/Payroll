@@ -1,6 +1,8 @@
-import { UserAssignRoleRequestDtoType } from "@app/dto/UserAssignRoleRequestDto";
-import { UserLoginResponseDto } from "@app/dto/UserLoginResponseDto";
-import { UserResponseDto } from "@app/dto/UserResponseDto";
+import { UserAssignRoleType } from "@app/dto/request/UserAssignRoleRequestDto";
+import { UserLoginType } from "@app/dto/request/UserLoginRequestDto";
+import { MessageResponseDto } from "@app/dto/response/MessageResponseDto";
+import { UserLoginResponseDto } from "@app/dto/response/UserLoginResponseDto";
+import { UserResponseDto } from "@app/dto/response/UserResponseDto";
 import { NewUserModel } from "@app/model/User";
 import { UserRepository } from "@app/repository/UserRepository";
 import { AuthenticationException } from "@exception/AuthenticationException";
@@ -36,20 +38,19 @@ export class UserService {
       ...userDto,
       password: hashedPassword,
     });
+
+    return new MessageResponseDto("Successfully registered");
   }
 
-  public async login(
-    email: string,
-    password: string
-  ): Promise<UserLoginResponseDto> {
-    const user = await this.userRepository.getUserByEmail(email);
+  public async login(loginDto: UserLoginType): Promise<UserLoginResponseDto> {
+    const user = await this.userRepository.getUserByEmail(loginDto.email);
 
     if (!user) {
       throw new AuthenticationException("Invalid email or password");
     }
 
     const isValidPassword = await this.passwordEncoder.match(
-      password,
+      loginDto.password,
       user.password
     );
 
@@ -74,16 +75,15 @@ export class UserService {
     return new UserResponseDto(user);
   }
 
-  public async assignUserRole(
-    roleDto: UserAssignRoleRequestDtoType,
-    id: number
-  ) {
+  public async assignUserRole(roleDto: UserAssignRoleType, id: number) {
     const user = await this.userRepository.getUserById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} does not exists`);
     }
 
     await this.userRepository.assignUserRole(roleDto, id);
+
+    return new MessageResponseDto("Role assigned successfully");
   }
 
   public async deleteUserById(id: number) {

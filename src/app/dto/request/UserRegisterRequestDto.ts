@@ -7,6 +7,6 @@ export const UserRegisterRequestDto = z.object({
     lastName: z.string().optional(),
     email: z.string().email(),
     password: z.string().min(6),
-    role: z.enum(userRole),
+    role: z.enum(userRole), // ADMIN / HR
   }),
 });

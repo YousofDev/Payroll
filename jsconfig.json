@@ -3,10 +3,12 @@
     "baseUrl": ".",
     "paths": {
       "@app/*": ["./src/app/*"],
-      "@config/*": ["./src/config/*"],
-      "@types/*": ["./src/types/*"],
-      "@lib/*": ["./src/lib/*"],
-      "@db/*": ["./src/db/*"],
+      "@config/*": ["./src/common/config/*"],
+      "@types/*": ["./src/common/types/*"],
+      "@util/*": ["./src/common/util/*"],
+      "@data/*": ["./src/common/data/*"],
+      "@middleware/*": ["./src/common/middleware/*"],
+      "@exception/*": ["./src/common/exception/*"]
     }
   },
   "exclude": ["node_modules", "dist"]

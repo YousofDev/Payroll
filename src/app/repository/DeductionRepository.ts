@@ -5,7 +5,6 @@ import {
 } from "@app/model/Deduction";
 import { DeductionType } from "@app/model/DeductionType";
 import { DatabaseClient } from "@data/DatabaseClient";
-import { FrequencyType } from "@data/pgEnums";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
 import { eq, and, lte, gte, between } from "drizzle-orm";
@@ -30,15 +29,8 @@ export class DeductionRepository {
   public async getAllDeductions() {
     return await this.db
       .select({
-        id: Deduction.id,
-        employeeId: Deduction.employeeId,
-        deductionTypeId: Deduction.deductionTypeId,
-        frequencyType: DeductionType.frequencyType,
-        amount: Deduction.amount,
-        name: DeductionType.name,
-        description: DeductionType.description,
-        createdAt: Deduction.createdAt,
-        updatedAt: Deduction.updatedAt,
+        deduction: Deduction,
+        deductionType: DeductionType,
       })
       .from(Deduction)
       .innerJoin(
@@ -50,15 +42,8 @@ export class DeductionRepository {
   public async getDeductionById(deductionId: number) {
     return await this.db
       .select({
-        id: Deduction.id,
-        employeeId: Deduction.employeeId,
-        deductionTypeId: Deduction.deductionTypeId,
-        frequencyType: DeductionType.frequencyType,
-        amount: Deduction.amount,
-        name: DeductionType.name,
-        description: DeductionType.description,
-        createdAt: Deduction.createdAt,
-        updatedAt: Deduction.updatedAt,
+        deduction: Deduction,
+        deductionType: DeductionType,
       })
       .from(Deduction)
       .innerJoin(DeductionType, eq(Deduction.deductionTypeId, DeductionType.id))
@@ -72,9 +57,8 @@ export class DeductionRepository {
   ) {
     return await this.db
       .select({
-        frequencyType: DeductionType.frequencyType,
-        name: DeductionType.name,
-        description: DeductionType.description,
+        deduction: Deduction,
+        deductionType: DeductionType,
       })
       .from(Deduction)
       .innerJoin(DeductionType, eq(Deduction.deductionTypeId, DeductionType.id))
@@ -97,6 +81,7 @@ export class DeductionRepository {
         amount: Deduction.amount,
         name: DeductionType.name,
         description: DeductionType.description,
+        metadata: Deduction.metadata,
         createdAt: Deduction.createdAt,
         updatedAt: Deduction.updatedAt,
       })
@@ -105,7 +90,7 @@ export class DeductionRepository {
       .where(
         and(
           eq(Deduction.employeeId, employeeId),
-          eq(DeductionType.frequencyType, FrequencyType.enumValues[0])
+          eq(DeductionType.frequencyType, "MONTHLY")
         )
       );
   }
@@ -124,6 +109,7 @@ export class DeductionRepository {
         amount: Deduction.amount,
         name: DeductionType.name,
         description: DeductionType.description,
+        metadata: Deduction.metadata,
         createdAt: Deduction.createdAt,
         updatedAt: Deduction.updatedAt,
       })
@@ -132,7 +118,7 @@ export class DeductionRepository {
       .where(
         and(
           eq(Deduction.employeeId, employeeId),
-          eq(DeductionType.frequencyType, FrequencyType.enumValues[1]),
+          eq(DeductionType.frequencyType, "SPECIAL"),
           gte(Deduction.createdAt, new Date(payPeriodStart)),
           between(
             Deduction.createdAt,
@@ -144,7 +130,7 @@ export class DeductionRepository {
   }
 
   public async updateDeduction(
-    deductionDto: NewDeductionModel,
+    deductionDto: Partial<DeductionModel>,
     deductionId: number
   ): Promise<DeductionModel> {
     const deduction = await this.db

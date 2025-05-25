@@ -9,7 +9,7 @@ export class DatabaseClient {
 
   private constructor() {
     const pool = new Pool({
-      connectionString: env.DATABASE_CONNECTION,
+      connectionString: env.NODE_ENV === "test" ? env.TEST_DATABASE_CONNECTION : env.DATABASE_CONNECTION,
     });
 
     this.dbConnection = drizzle(pool);
