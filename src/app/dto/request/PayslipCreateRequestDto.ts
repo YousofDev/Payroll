@@ -15,7 +15,7 @@ export const PayslipCreateRequestDto = z.object({
         .refine((dateString) => !isNaN(Date.parse(dateString)), {
           message: "Invalid date format for payPeriodEnd",
         }),
-      payslipStatus: z.enum(payslipStatus),
+      payslipStatus: z.enum(payslipStatus), // "DRAFT", "PROCESSED", "PAID"
       companyName: z.string().max(50),
       companyAddress: z.string().max(100),
       companyLogo: z.string().optional(),

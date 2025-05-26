@@ -19,7 +19,7 @@ router.get(`${path}/:id`, controller.getPayslipById.bind(controller));
 
 router.delete(
   `${path}/:id`,
-  // hasAuthority("ADMIN"),
+  hasAuthority("ADMIN"),
   controller.deletePayslipById.bind(controller)
 );
 

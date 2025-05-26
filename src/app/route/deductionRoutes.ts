@@ -3,6 +3,7 @@ import { container } from "@config/dependencyContainer";
 import { env } from "@config/env";
 import { catchRouteErrors } from "@util/catchRouteErrors";
 import { DeductionController } from "@app/controller/DeductionController";
+import { hasAuthority } from "@middleware/hasAuthority";
 
 const controller = container.resolve(
   DeductionController
@@ -11,6 +12,8 @@ const controller = container.resolve(
 const path = `${env.API_VERSION}/deductions`;
 
 const router = Router();
+
+router.use(hasAuthority("ADMIN", "HR"))
 
 router.get(`${path}`, controller.getAllDeductions.bind(controller));
 

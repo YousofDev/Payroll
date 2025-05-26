@@ -2,6 +2,14 @@ import { DeductionModel } from "@app/model/Deduction";
 import { DeductionTypeModel } from "@app/model/DeductionType";
 import { HoursMetadata } from "@data/pgTypes";
 
+/*
+type HoursMetadata = {
+    hours?: number;
+    hourRate?: number;
+    multiplier?: number;
+}
+*/
+
 export class DeductionResponseDto {
   id: number;
   employeeId: number;

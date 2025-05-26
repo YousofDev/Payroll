@@ -39,6 +39,7 @@ export const DeductionUpdateRequestDto = z.object({
   params: z.object({
     id: z
       .string({ message: "Deduction ID Required" })
+      .regex(/^-?\d+$/, { message: "ID must be a number" })
       .transform((id) => parseInt(id)),
   }),
 });

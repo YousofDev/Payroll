@@ -51,7 +51,7 @@ export const globalErrorHandler = (
   }
 
   if (err instanceof Error && err.stack) {
-    logger.error(err.stack);
+    // logger.error(err.stack);
   } else {
     logger.error(`${err}`);
   }
