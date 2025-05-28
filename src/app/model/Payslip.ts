@@ -10,7 +10,7 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 import { Employee } from "@app/model/Employee";
-import { Direction, HoursMetadata, PayslipStatus } from "@data/pgTypes";
+import { Direction, HoursMetadata, PayslipStatus } from "@data/pgEnums";
 
 export const Payslip = pgTable("payslips", {
   id: serial("id").primaryKey(),

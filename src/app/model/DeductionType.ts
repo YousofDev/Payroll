@@ -1,4 +1,4 @@
-import { FrequencyType } from "@data/pgTypes";
+import { FrequencyType } from "@data/pgEnums";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 

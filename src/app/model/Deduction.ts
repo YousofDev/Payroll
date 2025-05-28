@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { Employee } from "@app/model/Employee";
 import { DeductionType } from "@app/model/DeductionType";
-import { HoursMetadata } from "@data/pgTypes";
+import { HoursMetadata } from "@data/pgEnums";
 
 export const Deduction = pgTable("deductions", {
   id: serial("id").primaryKey(),

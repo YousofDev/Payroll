@@ -1,4 +1,4 @@
-import { UserRole } from "@data/pgTypes";
+import { UserRole } from "@data/pgEnums";
 import { InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
 import {
   pgTable,

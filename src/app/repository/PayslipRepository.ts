@@ -11,7 +11,7 @@ import { logger } from "@util/logger";
 import { DirectionType } from "@config/constants";
 
 import { PreparedPayslipType } from "@app/dto/internal/PreparedPayslipType";
-import { Direction } from "@data/pgTypes";
+import { Direction } from "@data/pgEnums";
 import { DatabaseException } from "@exception/DatabaseException";
 import { BadRequestException } from "@exception/BadRequestException";
 

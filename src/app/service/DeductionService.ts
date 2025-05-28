@@ -4,7 +4,7 @@ import { EmployeeRepository } from "@app/repository/EmployeeRepository";
 import { DeductionRepository } from "@app/repository/DeductionRepository";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { FrequencyType, HoursMetadata } from "@data/pgTypes";
+import { FrequencyType, HoursMetadata } from "@data/pgEnums";
 import { BadRequestException } from "@exception/BadRequestException";
 import { DeductionCreateType } from "@app/dto/request/DeductionCreateRequestDto";
 import { DeductionUpdateType } from "@app/dto/request/DeductionUpdateRequestDto";

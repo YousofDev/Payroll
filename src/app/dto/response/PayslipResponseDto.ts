@@ -1,5 +1,5 @@
 import { PayslipItemModel, PayslipModel } from "@app/model/Payslip";
-import { Direction, HoursMetadata } from "@data/pgTypes";
+import { Direction, HoursMetadata } from "@data/pgEnums";
 
 export class PayslipItemResponseDto {
   id: number;

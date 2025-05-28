@@ -5,7 +5,7 @@ import { EmployeeRepository } from "@app/repository/EmployeeRepository";
 import { AdditionRepository } from "@app/repository/AdditionRepository";
 import { NotFoundException } from "@exception/NotFoundException";
 import { logger } from "@util/logger";
-import { FrequencyType, HoursMetadata } from "@data/pgTypes";
+import { FrequencyType, HoursMetadata } from "@data/pgEnums";
 import { BadRequestException } from "@exception/BadRequestException";
 import { AdditionCreateType } from "@app/dto/request/AdditionCreateRequestDto";
 import { AdditionUpdateType } from "@app/dto/request/AdditionUpdateRequestDto";

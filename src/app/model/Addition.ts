@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { Employee } from "@app/model/Employee";
 import { AdditionType } from "@app/model/AdditionType";
-import { HoursMetadata } from "@data/pgTypes";
+import { HoursMetadata } from "@data/pgEnums";
 
 export const Addition = pgTable("additions", {
   id: serial("id").primaryKey(),

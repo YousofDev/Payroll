@@ -1,6 +1,6 @@
 import { DeductionModel } from "@app/model/Deduction";
 import { DeductionTypeModel } from "@app/model/DeductionType";
-import { HoursMetadata } from "@data/pgTypes";
+import { HoursMetadata } from "@data/pgEnums";
 
 /*
 type HoursMetadata = {

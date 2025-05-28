@@ -1,6 +1,6 @@
 import { AdditionModel } from "@app/model/Addition";
 import { AdditionTypeModel } from "@app/model/AdditionType";
-import { HoursMetadata } from "@data/pgTypes";
+import { HoursMetadata } from "@data/pgEnums";
 
 export class AdditionResponseDto {
   id: number;

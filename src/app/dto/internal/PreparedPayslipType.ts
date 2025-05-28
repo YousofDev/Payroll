@@ -1,4 +1,4 @@
-import { HoursMetadata } from "@data/pgTypes";
+import { HoursMetadata } from "@data/pgEnums";
 
 export interface PreparedAddition {
   name: string;
