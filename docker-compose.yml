@@ -1,0 +1,117 @@
+services:
+  # Production Database
+  postgres-prod:
+    image: postgres:15-alpine
+    container_name: payroll-postgres-prod
+    environment:
+      POSTGRES_DB: payroll
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - payroll-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d payroll"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Test Database
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: payroll-postgres-test
+    environment:
+      POSTGRES_DB: testpayroll
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - payroll-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d testpayroll"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: payroll-app
+    environment:
+      DATABASE_CONNECTION: postgresql://postgres:${DB_PASSWORD}@postgres-prod:5432/payroll
+      TEST_DATABASE_CONNECTION: postgresql://postgres:${DB_PASSWORD}@postgres-test:5432/testpayroll
+      DB_PASSWORD: ${DB_PASSWORD}
+      API_DOMAIN: ${API_DOMAIN}
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
+      PORT: ${PORT}
+      HOST: 0.0.0.0
+      API_VERSION: ${API_VERSION}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN}
+      NODE_ENV: ${NODE_ENV}
+    ports:
+      - "${PORT}:4000"
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - payroll-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/api/v1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - app_logs:/app/logs
+
+  # Migration service (runs once and exits)
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: payroll-migrate
+    environment:
+      DATABASE_CONNECTION: postgresql://postgres:${DB_PASSWORD}@postgres-prod:5432/payroll
+      TEST_DATABASE_CONNECTION: postgresql://postgres:${DB_PASSWORD}@postgres-test:5432/testpayroll
+      DB_PASSWORD: ${DB_PASSWORD}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - payroll-network
+    command: sh -c "
+      echo 'Running production migrations...' &&
+      pnpm run migrate:prod &&
+      echo 'Running test migrations...' &&
+      pnpm run migrate:test &&
+      echo 'Migrations completed successfully'"
+    restart: "no"
+
+volumes:
+  postgres_prod_data:
+  postgres_test_data:
+  app_logs:
+
+networks:
+  payroll-network:
+    driver: bridge

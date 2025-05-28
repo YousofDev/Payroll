@@ -1,0 +1,262 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/payroll-app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: 1234
+          POSTGRES_USER: postgres
+          POSTGRES_DB: testpayroll
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: latest
+        run_install: false
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Build application
+      run: pnpm run build
+
+    - name: Setup test environment
+      run: |
+        echo "DATABASE_CONNECTION=postgresql://postgres:1234@localhost:5432/payroll" >> $GITHUB_ENV
+        echo "TEST_DATABASE_CONNECTION=postgresql://postgres:1234@localhost:5432/testpayroll" >> $GITHUB_ENV
+        echo "NODE_ENV=test" >> $GITHUB_ENV
+
+    - name: Run database migrations
+      run: NODE_ENV=test pnpm run migrate
+      env:
+        DATABASE_CONNECTION: postgresql://postgres:1234@localhost:5432/payroll
+        TEST_DATABASE_CONNECTION: postgresql://postgres:1234@localhost:5432/testpayroll
+        DB_PASSWORD: 1234
+        API_DOMAIN: http://localhost:4000
+        PUBLIC_API_URL: http://localhost:4000/api/v1
+        PORT: 4000
+        HOST: localhost
+        API_VERSION: /api/v1
+        ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+        ACCESS_TOKEN_EXPIRES_IN: 1296000
+        NODE_ENV: test
+
+    - name: Run tests
+      run: pnpm run test
+      env:
+        DATABASE_CONNECTION: postgresql://postgres:1234@localhost:5432/payroll
+        TEST_DATABASE_CONNECTION: postgresql://postgres:1234@localhost:5432/testpayroll
+        DB_PASSWORD: 1234
+        API_DOMAIN: http://localhost:4000 
+        PUBLIC_API_URL: http://localhost:4000/api/v1
+        PORT: 4000
+        HOST: localhost
+        API_VERSION: /api/v1
+        ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+        ACCESS_TOKEN_EXPIRES_IN: 1296000
+        NODE_ENV: test
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        target: production
+        
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx (includes Docker Compose setup)
+      uses: docker/setup-buildx-action@v3
+
+    - name: Create .env file
+      run: |
+        cat << EOF > .env
+        DATABASE_CONNECTION=${{ secrets.DATABASE_CONNECTION }}
+        TEST_DATABASE_CONNECTION=${{ secrets.TEST_DATABASE_CONNECTION }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        API_DOMAIN=${{ secrets.API_DOMAIN }}
+        PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL }}
+        PORT=${{ secrets.PORT }}
+        HOST=0.0.0.0
+        API_VERSION=${{ secrets.API_VERSION }}
+        ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+        ACCESS_TOKEN_EXPIRES_IN=${{ secrets.ACCESS_TOKEN_EXPIRES_IN }}
+        NODE_ENV=prod
+        EOF
+
+    - name: Create init-db.sql
+      run: |
+        cat << EOF > init-db.sql
+        -- Create production database if it doesn't exist
+        SELECT 'CREATE DATABASE payroll'
+        WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'payroll')\gexec
+        
+        -- Create test database if it doesn't exist
+        SELECT 'CREATE DATABASE testpayroll'
+        WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'testpayroll')\gexec
+        EOF
+
+    - name: Pull latest Docker image
+      run: docker pull ${{ env.IMAGE_NAME }}:latest
+
+    - name: Stop existing containers
+      run: |
+        docker compose down --remove-orphans || true
+        docker system prune -f
+
+    - name: Start services
+      run: |
+        # Start databases first
+        docker compose up -d postgres-prod postgres-test
+        
+        # Wait for databases to be ready
+        echo "Waiting for databases to be ready..."
+        sleep 30
+        
+        # Run migrations
+        docker compose up migrate
+        
+        # Start the application
+        docker compose up -d app
+        
+        # Wait for application to start
+        echo "Waiting for application to start..."
+        sleep 20
+
+    - name: Health check
+      run: |
+        max_attempts=10
+        attempt=1
+        
+        while [ $attempt -le $max_attempts ]; do
+          echo "Health check attempt $attempt/$max_attempts"
+          
+          if curl -f http://0.0.0.0:${{ secrets.PORT }}/api/v1; then
+            echo "✅ Application is healthy!"
+            exit 0
+          fi
+          
+          echo "❌ Health check failed, retrying in 10 seconds..."
+          sleep 10
+          attempt=$((attempt + 1))
+        done
+        
+        echo "❌ Application failed to start after $max_attempts attempts"
+        docker compose logs app
+        exit 1
+
+    - name: Verify deployment
+      run: |
+        echo "=== Deployment Verification ==="
+        echo "Testing API endpoint..."
+        
+        response=$(curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:${{ secrets.PORT }}/api/v1)
+        
+        if [ "$response" = "200" ]; then
+          echo "✅ API endpoint is responding correctly (HTTP $response)"
+          echo "🚀 Deployment successful!"
+        else
+          echo "❌ API endpoint returned HTTP $response"
+          echo "Container logs:"
+          docker compose logs app
+          exit 1
+        fi
+
+    - name: Cleanup on failure
+      if: failure()
+      run: |
+        echo "=== Cleanup after failure ==="
+        docker compose logs
+        docker compose down --remove-orphans
+        docker system prune -f
