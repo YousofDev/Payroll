@@ -20,7 +20,9 @@
     "fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "generate": "pnpm drizzle-kit generate",
-    "migrate": "pnpm drizzle-kit migrate",
+    "migrate": "pnpm drizzle-kit migrate --config=drizzle.migrate.config.ts",
+    "migrate:prod": "NODE_ENV=prod pnpm drizzle-kit migrate --config=drizzle.migrate.config.ts",
+    "migrate:test": "NODE_ENV=test pnpm drizzle-kit migrate --config=drizzle.migrate.config.ts",
     "push": "pnpm drizzle-kit push",
     "studio": "pnpm drizzle-kit studio"
   },
