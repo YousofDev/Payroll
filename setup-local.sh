@@ -12,7 +12,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+if ! command -v docker compose &> /dev/null && ! docker compose version &> /dev/null; then
     echo "❌ Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
@@ -54,11 +54,11 @@ chmod +x migrate.sh
 
 # Clean up any existing containers
 echo "🧹 Cleaning up existing containers..."
-docker-compose down --remove-orphans 2>/dev/null || true
+docker compose down --remove-orphans 2>/dev/null || true
 
 # Build and start services
 echo "🔨 Building and starting services..."
-docker-compose up -d postgres-prod postgres-test
+docker compose up -d postgres-prod postgres-test
 
 # Wait for databases
 echo "⏳ Waiting for databases to start..."
@@ -66,11 +66,11 @@ sleep 15
 
 # Run migrations
 echo "🔄 Running migrations..."
-docker-compose up migrate
+docker compose up migrate
 
 # Start the application
 echo "🚀 Starting application..."
-docker-compose up -d app
+docker compose up -d app
 
 # Wait for application
 echo "⏳ Waiting for application to start..."
@@ -92,10 +92,10 @@ while [ $attempt -le $max_attempts ]; do
         echo "🧪 Test DB: localhost:5433"
         echo ""
         echo "📋 Useful commands:"
-        echo "  - View logs: docker-compose logs -f app"
-        echo "  - Stop services: docker-compose down"
-        echo "  - Restart services: docker-compose restart"
-        echo "  - Run migrations: docker-compose up migrate"
+        echo "  - View logs: docker compose logs -f app"
+        echo "  - Stop services: docker compose down"
+        echo "  - Restart services: docker compose restart"
+        echo "  - Run migrations: docker compose up migrate"
         exit 0
     fi
     
@@ -105,5 +105,5 @@ while [ $attempt -le $max_attempts ]; do
 done
 
 echo "❌ Application failed to start. Check logs:"
-docker-compose logs app
+docker compose logs app
 exit 1
