@@ -265,7 +265,7 @@ The project includes a GitHub Actions CI/CD pipeline that:
 
 - Production migrations: `pnpm run migrate:prod`
 
-# Test migrations: `pnpm run migrate:test`
+- Test migrations: `pnpm run migrate:test`
 
 ### Run both: `./migrate.sh`
 
@@ -276,12 +276,6 @@ The project includes a GitHub Actions CI/CD pipeline that:
 
 ---
 
-## 📝 License
-
-This project is licensed under the MIT License.
-
----
-
 ## 📬 Contact
 
-### For questions or contributions, feel free to reach out via GitHub Issues
+For questions or contributions, feel free to reach out via GitHub Issues

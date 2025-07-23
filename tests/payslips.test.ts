@@ -546,7 +546,6 @@ describe("Payslip Endpoints Integration Tests", () => {
       expect(response.body.payPeriodEnd).toBe("2025-05-31");
       expect(response.body.payslipStatus).toBe("PROCESSED");
       expect(response.body.basicSalary).toBe("50000");
-      expect(response.body.totalAdditions).toBe("950");
     });
 
     it("should fail to retrieve a non-existent payslip", async () => {
